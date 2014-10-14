@@ -21,5 +21,8 @@ int main(int argc, char *argv[])
     w.init();
     w.show();
 
-    return a.exec();
+    const int r = a.exec();
+    delete playlist;
+    delete player;
+    return r;
 }
