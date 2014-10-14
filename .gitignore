@@ -4,3 +4,4 @@ test*.mp3
 moc_*.cpp
 moc_*.h
 moc_*.o
+Makefile
