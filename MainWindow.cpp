@@ -12,20 +12,20 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     layout_ch_ctrl(new QHBoxLayout(parent)),
     layout_song_ctrl(new QHBoxLayout(parent)),
     layout_volume_ctrl(new QHBoxLayout(parent)),
-    l_title(new QLabel("title", this)),
-    l_ch(new QLabel("chapter", this)),
-    l_song(new QLabel("song", this)),
-    btn_playpause(new QPushButton("Play", this)),
-    btn_proceed(new QPushButton("&Proceed", this)),
-    btn_reset(new QPushButton("Reset", this)),
-    btn_ch_prev(new QPushButton("-", this)),
-    btn_ch_next(new QPushButton("+", this)),
-    btn_song_prev(new QPushButton("-", this)),
-    btn_song_next(new QPushButton("+", this)),
+    l_title(new QLabel(tr("title"), this)),
+    l_ch(new QLabel(tr("chapter"), this)),
+    l_song(new QLabel(tr("song"), this)),
+    btn_playpause(new QPushButton(tr("Play"), this)),
+    btn_proceed(new QPushButton(tr("&Proceed"), this)),
+    btn_reset(new QPushButton(tr("Reset"), this)),
+    btn_ch_prev(new QPushButton(tr("-"), this)),
+    btn_ch_next(new QPushButton(tr("+"), this)),
+    btn_song_prev(new QPushButton(tr("-"), this)),
+    btn_song_next(new QPushButton(tr("+"), this)),
     slider_volume(new QSlider(Qt::Horizontal, this)),
-    file(new QMenu("&File", this)),
-    act_selectOSTDirectoy(new QAction("&Select OST directoy", this)),
-    act_proceed(new QAction("&Proceed", this)),
+    file(new QMenu(tr("&File"), this)),
+    act_selectOSTDirectoy(new QAction(tr("&Select OST directoy"), this)),
+    act_proceed(new QAction(tr("&Proceed"), this)),
     settings(new QSettings(this)),
     playlist(playlist),
     player(player)
@@ -76,7 +76,7 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     this->setCentralWidget(this->centralWidget);
 
     // create menu bar
-    file = menuBar()->addMenu("&File");
+    file = menuBar()->addMenu(tr("&File"));
     file->addAction(act_proceed);
     file->addAction(act_selectOSTDirectoy);
     act_selectOSTDirectoy->setShortcut(QKeySequence(Qt::Key_O));
@@ -100,14 +100,22 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
 
 void MainWindow::init() {
     // check for map files
+    if (!QFile::exists("./Sisterhood.txt")) {
+        qDebug() << "File does not exist";
+    }
+
+    if (!QFile::exists("./Songlist.txt")) {
+        qDebug() << "File does not exist";
+    }
+
     // pass qfiles to playlist
     playlist->init();
     // check for saved mp3 dir
     player->testSetAudioChain();
-    player->setCurrentTrack(QString("test2.mp3"));
+    player->setCurrentTrack(QString(tr("test2.mp3")));
     // load settings, e.g. last pos and start playback
     //this->playpause_cb();
-    btn_playpause->setText(player->isPlaying() ? "Pause" : "Play");
+    btn_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
 }
 
 
@@ -116,11 +124,11 @@ void MainWindow::playpause_cb()
     qDebug() << "playpause_cb";
     
     if (player->isPlaying()) {
-        btn_playpause->setText("Play");
+        btn_playpause->setText(tr("Play"));
         player->pause();
     }
     else {
-        btn_playpause->setText("Pause");
+        btn_playpause->setText(tr("Pause"));
         player->setVolume((float) slider_volume->value() / max_volume);
         player->play();
     }
