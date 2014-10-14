@@ -26,13 +26,14 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     file(new QMenu("&File", this)),
     act_selectOSTDirectoy(new QAction("&Select OST directoy", this)),
     act_proceed(new QAction("&Proceed", this)),
+    settings(new QSettings(this)),
     playlist(playlist),
     player(player)
 {
     slider_volume->setRange(0, max_volume);
+    slider_volume->setValue(max_volume / 2);
     slider_volume->setTickInterval(1);
     //slider_volume->setTickPosition(QSlider::TicksAbove);
-    slider_volume->setValue(max_volume / 2);
 
     layout_main_ctrl->setColumnStretch(0, 1);
     layout_main_ctrl->setColumnStretch(1, 0);
@@ -78,6 +79,8 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     file = menuBar()->addMenu("&File");
     file->addAction(act_proceed);
     file->addAction(act_selectOSTDirectoy);
+    act_selectOSTDirectoy->setShortcut(QKeySequence(Qt::Key_O));
+    act_proceed->setShortcut(QKeySequence(Qt::Key_P));
 
     // connect slots
     connect(btn_playpause, SIGNAL(clicked()), this, SLOT(playpause_cb()));

@@ -51,6 +51,7 @@ private:
     QAction *act_selectOSTDirectoy;
     QAction *act_proceed;
 
+    QSettings *settings;
     Playlist *playlist;
     LoopingPlayer *player;
 
