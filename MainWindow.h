@@ -53,6 +53,8 @@ private:
     Playlist *playlist;
     LoopingPlayer *player;
 
+    QString selectFolder(const QString &caption);
+
 private slots:
     void playpause_cb();
     void proceed_cb();

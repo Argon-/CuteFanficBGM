@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     l_title(new QLabel("title", this)),
     l_ch(new QLabel("chapter", this)),
     l_song(new QLabel("song", this)),
-    btn_playpause(new QPushButton("---", this)),
+    btn_playpause(new QPushButton("Play", this)),
     btn_proceed(new QPushButton("&Proceed", this)),
     btn_reset(new QPushButton("Reset", this)),
     btn_ch_prev(new QPushButton("-", this)),
@@ -98,7 +98,7 @@ void MainWindow::init() {
     btn_playpause->setText(player->isPlaying() ? "Pause" : "Play");
     // load settings, e.g. last pos and start playback
     player->setCurrentTrack(QString("test2.mp3"));
-    this->playpause_cb();
+    //this->playpause_cb();
 }
 
 
@@ -164,6 +164,16 @@ void MainWindow::slider_volume_cb(int value)
 void MainWindow::selectOSTFolder_cb()
 {
     qDebug() << "selectOSTFolder_cb";
+    this->selectFolder(tr("Select OST folder"));
+}
+
+
+QString MainWindow::selectFolder(const QString &caption)
+{
+    return QFileDialog::getExistingDirectory(this, 
+            caption, 
+            QDir::homePath(), 
+            QFileDialog::ShowDirsOnly);
 }
 
 
