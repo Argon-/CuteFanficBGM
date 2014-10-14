@@ -48,12 +48,13 @@ private:
     QSlider *slider_volume;
 
     QMenu *file;
-    QAction *selectOSTFolder;
+    QAction *act_selectOSTDirectoy;
+    QAction *act_proceed;
 
     Playlist *playlist;
     LoopingPlayer *player;
 
-    QString selectFolder(const QString &caption);
+    QString selectDirectoy(const QString &caption);
 
 private slots:
     void playpause_cb();
@@ -64,7 +65,7 @@ private slots:
     void song_prev_cb();
     void song_next_cb();
     void slider_volume_cb(int value);
-    void selectOSTFolder_cb();
+    void selectOSTDirectoy_cb();
 
 };
 

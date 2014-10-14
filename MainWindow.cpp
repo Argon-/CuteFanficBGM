@@ -24,7 +24,8 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     btn_song_next(new QPushButton("+", this)),
     slider_volume(new QSlider(Qt::Horizontal, this)),
     file(new QMenu("&File", this)),
-    selectOSTFolder(new QAction("&Select OST folder", this)),
+    act_selectOSTDirectoy(new QAction("&Select OST directoy", this)),
+    act_proceed(new QAction("&Proceed", this)),
     playlist(playlist),
     player(player)
 {
@@ -75,7 +76,8 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
 
     // create menu bar
     file = menuBar()->addMenu("&File");
-    file->addAction(selectOSTFolder);
+    file->addAction(act_proceed);
+    file->addAction(act_selectOSTDirectoy);
 
     // connect slots
     connect(btn_playpause, SIGNAL(clicked()), this, SLOT(playpause_cb()));
@@ -86,19 +88,23 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     connect(btn_song_prev, SIGNAL(clicked()), this, SLOT(song_prev_cb()));
     connect(btn_song_next, SIGNAL(clicked()), this, SLOT(song_next_cb()));
     connect(slider_volume, SIGNAL(valueChanged(int)), this, SLOT(slider_volume_cb(int)));
-    connect(selectOSTFolder, SIGNAL(triggered()), this, SLOT(selectOSTFolder_cb()));
+    connect(act_selectOSTDirectoy, SIGNAL(triggered()), this, SLOT(selectOSTDirectoy_cb()));
+    connect(act_proceed, SIGNAL(triggered()), this, SLOT(proceed_cb()));
 
     btn_proceed->setFocus();
 }
 
 
 void MainWindow::init() {
+    // check for map files
+    // pass qfiles to playlist
+    playlist->init();
     // check for saved mp3 dir
     player->testSetAudioChain();
-    btn_playpause->setText(player->isPlaying() ? "Pause" : "Play");
-    // load settings, e.g. last pos and start playback
     player->setCurrentTrack(QString("test2.mp3"));
+    // load settings, e.g. last pos and start playback
     //this->playpause_cb();
+    btn_playpause->setText(player->isPlaying() ? "Pause" : "Play");
 }
 
 
@@ -161,14 +167,15 @@ void MainWindow::slider_volume_cb(int value)
 }
 
 
-void MainWindow::selectOSTFolder_cb()
+void MainWindow::selectOSTDirectoy_cb()
 {
-    qDebug() << "selectOSTFolder_cb";
-    this->selectFolder(tr("Select OST folder"));
+    qDebug() << "selectOSTDirectoy_cb";
+    //playlist->setOSTdirectory(this->selectDirectoy(tr("Select OST directory")));
+    qDebug() << this->selectDirectoy(tr("Select OST directory"));
 }
 
 
-QString MainWindow::selectFolder(const QString &caption)
+QString MainWindow::selectDirectoy(const QString &caption)
 {
     return QFileDialog::getExistingDirectory(this, 
             caption, 
