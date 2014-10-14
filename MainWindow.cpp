@@ -7,10 +7,12 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     max_volume(100),
     centralWidget(new QWidget(parent)),
     layout(new QVBoxLayout(parent)),
+    layout_title(new QHBoxLayout(parent)),
     layout_main_ctrl(new QGridLayout(parent)),
     layout_ch_ctrl(new QHBoxLayout(parent)),
     layout_song_ctrl(new QHBoxLayout(parent)),
     layout_volume_ctrl(new QHBoxLayout(parent)),
+    l_title(new QLabel("title", this)),
     l_ch(new QLabel("chapter", this)),
     l_song(new QLabel("song", this)),
     btn_playpause(new QPushButton("---", this)),
@@ -36,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     layout_main_ctrl->setColumnStretch(2, 0);
 
     // set size policies
+    l_title->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    l_title->setAlignment(Qt::AlignLeft);
     l_ch->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     l_ch->setAlignment(Qt::AlignHCenter);
     l_song->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -49,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     btn_song_next->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 
     // nest widgets & layouts
+    layout_title->addWidget(l_title);
     layout_main_ctrl->addWidget(btn_playpause, 0, 0, Qt::AlignLeft);
     layout_main_ctrl->addWidget(btn_proceed, 0, 1, Qt::AlignHCenter);
     layout_main_ctrl->addWidget(btn_reset, 0, 2, Qt::AlignRight);
@@ -60,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     layout_song_ctrl->addWidget(btn_song_next);
     layout_volume_ctrl->addWidget(slider_volume);
 
+    layout->addLayout(layout_title);
     layout->addLayout(layout_main_ctrl);
     layout->addLayout(layout_ch_ctrl);
     layout->addLayout(layout_song_ctrl);

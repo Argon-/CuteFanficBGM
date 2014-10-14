@@ -27,11 +27,13 @@ private:
     
     QWidget *centralWidget;
     QVBoxLayout *layout;
+    QHBoxLayout *layout_title;
     QGridLayout *layout_main_ctrl;
     QHBoxLayout *layout_ch_ctrl;
     QHBoxLayout *layout_song_ctrl;
     QHBoxLayout *layout_volume_ctrl;
 
+    QLabel *l_title;
     QLabel *l_ch;
     QLabel *l_song;
 
