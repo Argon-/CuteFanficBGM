@@ -5,6 +5,7 @@
 MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *player) : 
     QMainWindow(parent),
     max_volume(100),
+    alwaysOnTop(false),
     centralWidget(new QWidget(parent)),
     layout(new QVBoxLayout(parent)),
     layout_title(new QHBoxLayout(parent)),
@@ -23,9 +24,19 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     btn_song_prev(new QPushButton(tr("-"), this)),
     btn_song_next(new QPushButton(tr("+"), this)),
     slider_volume(new QSlider(Qt::Horizontal, this)),
-    file(new QMenu(tr("&File"), this)),
+    menu_controls(new QMenu(tr("Controls"), this)),
+    act_playpause(new QAction(tr("Play"), this)),
+    act_proceed(new QAction(tr("Proceed"), this)),
+    act_reset(new QAction(tr("Reset"), this)),
+    act_ch_next(new QAction(tr("Next chapter"), this)),
+    act_ch_prev(new QAction(tr("Previous chapter"), this)),
+    act_song_next(new QAction(tr("Next song"), this)),
+    act_song_prev(new QAction(tr("Previous song"), this)),
+    menu_settings(new QMenu(tr("Settings"), this)),
+    act_selectPlaylist(new QAction(tr("&Select playlist"), this)),
+    act_selectSonglist(new QAction(tr("&Select songlist"), this)),
     act_selectOSTDirectoy(new QAction(tr("&Select OST directoy"), this)),
-    act_proceed(new QAction(tr("&Proceed"), this)),
+    act_always_on_top(new QAction(tr("&Always On Top"), this)),
     settings(new QSettings(this)),
     playlist(playlist),
     player(player)
@@ -76,11 +87,35 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     this->setCentralWidget(this->centralWidget);
 
     // create menu bar
-    file = menuBar()->addMenu(tr("&File"));
-    file->addAction(act_proceed);
-    file->addAction(act_selectOSTDirectoy);
-    act_selectOSTDirectoy->setShortcut(QKeySequence(Qt::Key_O));
-    act_proceed->setShortcut(QKeySequence(Qt::Key_P));
+    menuBar()->addMenu(menu_controls);
+    menu_controls->addAction(act_playpause);
+    menu_controls->addAction(act_proceed);
+    menu_controls->addAction(act_reset);
+    menu_controls->addSeparator();
+    menu_controls->addAction(act_ch_next);
+    menu_controls->addAction(act_ch_prev);
+    menu_controls->addAction(act_song_next);
+    menu_controls->addAction(act_song_prev);
+
+    menuBar()->addMenu(menu_settings);
+    menu_settings->addAction(act_selectPlaylist);
+    menu_settings->addAction(act_selectSonglist);
+    menu_settings->addAction(act_selectOSTDirectoy);
+    menu_settings->addSeparator();
+    menu_settings->addAction(act_always_on_top);
+
+    act_playpause->setShortcut(QKeySequence(tr("Ctrl+P")));
+    act_proceed->setShortcut(QKeySequence(tr("P")));
+    act_reset->setShortcut(QKeySequence(tr("R")));
+    act_ch_next->setShortcut(QKeySequence(tr("Ctrl++")));
+    act_ch_prev->setShortcut(QKeySequence(tr("Ctrl+-")));
+    act_song_next->setShortcut(QKeySequence(tr("Shift++")));
+    act_song_prev->setShortcut(QKeySequence(tr("Shift++")));
+
+    act_selectPlaylist->setShortcut(QKeySequence(tr("Shift+P")));
+    act_selectSonglist->setShortcut(QKeySequence(tr("Shift+S")));
+    act_selectOSTDirectoy->setShortcut(QKeySequence(tr("Shift+O")));
+    act_always_on_top->setShortcut(QKeySequence(tr("Shift+A")));
 
     // connect slots
     connect(btn_playpause, SIGNAL(clicked()), this, SLOT(playpause_cb()));
@@ -91,8 +126,20 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     connect(btn_song_prev, SIGNAL(clicked()), this, SLOT(song_prev_cb()));
     connect(btn_song_next, SIGNAL(clicked()), this, SLOT(song_next_cb()));
     connect(slider_volume, SIGNAL(valueChanged(int)), this, SLOT(slider_volume_cb(int)));
-    connect(act_selectOSTDirectoy, SIGNAL(triggered()), this, SLOT(selectOSTDirectoy_cb()));
+
+    connect(act_playpause, SIGNAL(triggered()), this, SLOT(playpause_cb()));
     connect(act_proceed, SIGNAL(triggered()), this, SLOT(proceed_cb()));
+    connect(act_reset, SIGNAL(triggered()), this, SLOT(reset_cb()));
+    connect(act_ch_next, SIGNAL(triggered()), this, SLOT(ch_next_cb()));
+    connect(act_ch_prev, SIGNAL(triggered()), this, SLOT(ch_prev_cb()));
+    connect(act_song_next, SIGNAL(triggered()), this, SLOT(song_next_cb()));
+    connect(act_song_prev, SIGNAL(triggered()), this, SLOT(song_prev_cb()));
+
+    connect(act_selectPlaylist, SIGNAL(triggered()), this, SLOT(selectPlaylistFile()));
+    connect(act_selectSonglist, SIGNAL(triggered()), this, SLOT(selectSonglistFile()));
+    connect(act_selectOSTDirectoy, SIGNAL(triggered()), this, SLOT(selectOSTDirectoy()));
+    connect(act_always_on_top, SIGNAL(triggered()), this, SLOT(toggleAlwaysOnTop()));
+
 
     btn_proceed->setFocus();
 }
@@ -105,6 +152,7 @@ void MainWindow::init() {
     // load settings, e.g. last pos and start playback
     //this->playpause_cb();
     btn_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
+    act_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
 }
 
 
@@ -114,10 +162,12 @@ void MainWindow::playpause_cb()
     
     if (player->isPlaying()) {
         btn_playpause->setText(tr("Play"));
+        act_playpause->setText(tr("Play"));
         player->pause();
     }
     else {
         btn_playpause->setText(tr("Pause"));
+        act_playpause->setText(tr("Pause"));
         player->setVolume((float) slider_volume->value() / max_volume);
         player->play();
     }
@@ -167,9 +217,19 @@ void MainWindow::slider_volume_cb(int value)
 }
 
 
-void MainWindow::selectOSTDirectoy_cb()
+void MainWindow::selectSonglistFile()
 {
-    qDebug() << "selectOSTDirectoy_cb";
+}
+
+
+void MainWindow::selectPlaylistFile()
+{
+}
+
+
+void MainWindow::selectOSTDirectoy()
+{
+    qDebug() << "selectOSTDirectoy";
     //playlist->setOSTdirectory(this->selectDirectoy(tr("Select OST directory")));
     QString dir = QFileDialog::getExistingDirectory(this, 
                     tr("Select OST directory"), 
@@ -179,8 +239,9 @@ void MainWindow::selectOSTDirectoy_cb()
 }
 
 
-void MainWindow::setAlwaysOnTop(const bool alwaysOnTop)
+void MainWindow::toggleAlwaysOnTop()
 {
+    this->alwaysOnTop = !this->alwaysOnTop;
     if (alwaysOnTop) {
         this->setWindowFlags(this->windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
         this->show();

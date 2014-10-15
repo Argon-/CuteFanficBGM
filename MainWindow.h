@@ -22,8 +22,10 @@ public:
     ~MainWindow();
     void init();
 
+
 private:
     const int max_volume;
+    bool alwaysOnTop;
     
     QWidget *centralWidget;
     QVBoxLayout *layout;
@@ -47,15 +49,25 @@ private:
 
     QSlider *slider_volume;
 
-    QMenu *file;
-    QAction *act_selectOSTDirectoy;
+    QMenu *menu_controls;
+    QAction *act_playpause;
     QAction *act_proceed;
+    QAction *act_reset;
+    QAction *act_ch_next;
+    QAction *act_ch_prev;
+    QAction *act_song_next;
+    QAction *act_song_prev;
+
+    QMenu *menu_settings;
+    QAction *act_selectPlaylist;
+    QAction *act_selectSonglist;
+    QAction *act_selectOSTDirectoy;
+    QAction *act_always_on_top;
 
     QSettings *settings;
     Playlist *playlist;
     LoopingPlayer *player;
 
-    void setAlwaysOnTop(const bool alwaysOnTop);
 
 private slots:
     void playpause_cb();
@@ -66,7 +78,10 @@ private slots:
     void song_prev_cb();
     void song_next_cb();
     void slider_volume_cb(int value);
-    void selectOSTDirectoy_cb();
+    void selectSonglistFile();
+    void selectPlaylistFile();
+    void selectOSTDirectoy();
+    void toggleAlwaysOnTop();
 
 };
 
