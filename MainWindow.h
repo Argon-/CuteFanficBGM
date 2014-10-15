@@ -55,7 +55,7 @@ private:
     Playlist *playlist;
     LoopingPlayer *player;
 
-    QString selectDirectoy(const QString &caption);
+    void setAlwaysOnTop(const bool alwaysOnTop);
 
 private slots:
     void playpause_cb();

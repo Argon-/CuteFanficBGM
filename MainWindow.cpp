@@ -99,17 +99,6 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
 
 
 void MainWindow::init() {
-    // check for map files
-    if (!QFile::exists("./Sisterhood.txt")) {
-        qDebug() << "File does not exist";
-    }
-
-    if (!QFile::exists("./Songlist.txt")) {
-        qDebug() << "File does not exist";
-    }
-
-    // pass qfiles to playlist
-    playlist->init();
     // check for saved mp3 dir
     player->testSetAudioChain();
     player->setCurrentTrack(QString(tr("test2.mp3")));
@@ -182,16 +171,24 @@ void MainWindow::selectOSTDirectoy_cb()
 {
     qDebug() << "selectOSTDirectoy_cb";
     //playlist->setOSTdirectory(this->selectDirectoy(tr("Select OST directory")));
-    qDebug() << this->selectDirectoy(tr("Select OST directory"));
+    QString dir = QFileDialog::getExistingDirectory(this, 
+                    tr("Select OST directory"), 
+                    QDir::homePath(), 
+                    QFileDialog::ShowDirsOnly);
+    qDebug() << dir;
 }
 
 
-QString MainWindow::selectDirectoy(const QString &caption)
+void MainWindow::setAlwaysOnTop(const bool alwaysOnTop)
 {
-    return QFileDialog::getExistingDirectory(this, 
-            caption, 
-            QDir::homePath(), 
-            QFileDialog::ShowDirsOnly);
+    if (alwaysOnTop) {
+        this->setWindowFlags(this->windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
+        this->show();
+    }
+    else {
+        this->setWindowFlags(this->windowFlags() ^ (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint));
+        this->show();
+    }
 }
 
 
