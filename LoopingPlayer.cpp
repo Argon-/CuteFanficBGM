@@ -27,13 +27,13 @@ bool LoopingPlayer::testSetAudioChain()
         this->setUpAudioChain();
 
         if (audioConnected) {
-            QTextStream(stdout) << "Initialized audio chain";
-            qDebug() << "Capabilities:";
-            qDebug() << Phonon::BackendCapabilities::availableAudioOutputDevices();
-            qDebug() << Phonon::BackendCapabilities::availableMimeTypes();
+            QTextStream(stdout) << "Initialized audio chain" << endl;
+            //qDebug() << "Capabilities:";
+            //qDebug() << Phonon::BackendCapabilities::availableAudioOutputDevices();
+            //qDebug() << Phonon::BackendCapabilities::availableMimeTypes();
         }
         else {
-            QTextStream(stdout) << "Initializing audio chain failed";
+            QTextStream(stdout) << "Initializing audio chain failed" << endl;
         }
     }
     return audioConnected;
@@ -127,7 +127,10 @@ void LoopingPlayer::togglePlaying(const Phonon::MediaSource &cms)
 
 LoopingPlayer::~LoopingPlayer()
 {
-    delete mediaObject;
+    if (audioConnected) {
+        delete audioOutput;
+        delete mediaObject;
+    }
 }
 
 
