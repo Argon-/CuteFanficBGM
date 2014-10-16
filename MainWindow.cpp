@@ -119,37 +119,81 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
 
     // connect slots
     connect(btn_playpause, SIGNAL(clicked()), this, SLOT(playpause_cb()));
-    connect(btn_proceed, SIGNAL(clicked()), this, SLOT(proceed_cb()));
-    connect(btn_reset, SIGNAL(clicked()), this, SLOT(reset_cb()));
-    connect(btn_ch_prev, SIGNAL(clicked()), this, SLOT(ch_prev_cb()));
-    connect(btn_ch_next, SIGNAL(clicked()), this, SLOT(ch_next_cb()));
+    connect(btn_proceed,   SIGNAL(clicked()), this, SLOT(proceed_cb()));
+    connect(btn_reset,     SIGNAL(clicked()), this, SLOT(reset_cb()));
+    connect(btn_ch_prev,   SIGNAL(clicked()), this, SLOT(ch_prev_cb()));
+    connect(btn_ch_next,   SIGNAL(clicked()), this, SLOT(ch_next_cb()));
     connect(btn_song_prev, SIGNAL(clicked()), this, SLOT(song_prev_cb()));
     connect(btn_song_next, SIGNAL(clicked()), this, SLOT(song_next_cb()));
     connect(slider_volume, SIGNAL(valueChanged(int)), this, SLOT(slider_volume_cb(int)));
 
     connect(act_playpause, SIGNAL(triggered()), this, SLOT(playpause_cb()));
-    connect(act_proceed, SIGNAL(triggered()), this, SLOT(proceed_cb()));
-    connect(act_reset, SIGNAL(triggered()), this, SLOT(reset_cb()));
-    connect(act_ch_next, SIGNAL(triggered()), this, SLOT(ch_next_cb()));
-    connect(act_ch_prev, SIGNAL(triggered()), this, SLOT(ch_prev_cb()));
+    connect(act_proceed,   SIGNAL(triggered()), this, SLOT(proceed_cb()));
+    connect(act_reset,     SIGNAL(triggered()), this, SLOT(reset_cb()));
+    connect(act_ch_next,   SIGNAL(triggered()), this, SLOT(ch_next_cb()));
+    connect(act_ch_prev,   SIGNAL(triggered()), this, SLOT(ch_prev_cb()));
     connect(act_song_next, SIGNAL(triggered()), this, SLOT(song_next_cb()));
     connect(act_song_prev, SIGNAL(triggered()), this, SLOT(song_prev_cb()));
 
-    connect(act_selectPlaylist, SIGNAL(triggered()), this, SLOT(selectPlaylistFile()));
-    connect(act_selectSonglist, SIGNAL(triggered()), this, SLOT(selectSonglistFile()));
-    connect(act_selectOSTDirectoy, SIGNAL(triggered()), this, SLOT(selectOSTDirectoy()));
-    connect(act_always_on_top, SIGNAL(triggered()), this, SLOT(toggleAlwaysOnTop()));
-
+    connect(act_selectPlaylist,    SIGNAL(triggered()), this, SLOT(selectAndSetPlaylistFile_cb()));
+    connect(act_selectSonglist,    SIGNAL(triggered()), this, SLOT(selectAndSetSonglistFile_cb()));
+    connect(act_selectOSTDirectoy, SIGNAL(triggered()), this, SLOT(selectAndSetOSTDirectory_cb()));
+    connect(act_always_on_top,     SIGNAL(triggered()), this, SLOT(toggleAlwaysOnTop()));
 
     btn_proceed->setFocus();
+    QTimer::singleShot(0, this, SLOT(init()));
 }
 
 
 void MainWindow::init() {
-    // check for saved mp3 dir
+    QString path;
+
+    // retrieve playlist
+    path = settings->value("location/playlist", "Sisterhood.txt").toString();
+    qDebug() << "playlist: " << path;
+    if (!QFile::exists(path)) {
+        if (!this->selectAndSetPlaylistFile(path, true, "Quit")) {
+            this->close();
+            return;
+        }
+        settings->setValue("location/playlist", path);
+    }
+    qDebug() << "playlist: " << path;
+    
+    // retrieve songlist
+    path = settings->value("location/songlist", "Songlist.txt").toString();
+    qDebug() << "songlist: " << path;
+    if (!QFile::exists(path)) {
+        if (!this->selectAndSetSonglistFile(path, true, "Quit")) {
+            this->close();
+            return;
+        }
+        settings->setValue("location/songlist", path);
+    }
+    qDebug() << "songlist: " << path;
+
+    // retrieve ost dir
+    path = settings->value("location/ost").toString();
+    qDebug() << "ost: " << path;
+    if (!QFile::exists(path)) {
+        if (!this->selectAndSetOSTDirectory(path, true, "Quit")) {
+            this->close();
+            return;
+        }
+        settings->setValue("location/ost", path);
+    }
+    qDebug() << "ost: " << path;
+
+
+
+    // load settings, e.g. last pos and start playback, volume, file locations
+
+
+
+
     player->testSetAudioChain();
     player->setCurrentTrack(QString(tr("test2.mp3")));
-    // load settings, e.g. last pos and start playback
+    // load settings, e.g. last pos and start playback, volume, file locations
     //this->playpause_cb();
     btn_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
     act_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
@@ -217,25 +261,122 @@ void MainWindow::slider_volume_cb(int value)
 }
 
 
-void MainWindow::selectSonglistFile()
+void MainWindow::selectAndSetSonglistFile_cb()
 {
+    QString s;
+    if (!this->selectAndSetSonglistFile(s)) {
+        //this->close();
+        return;
+    }
+    QTextStream(stdout) << "New SonglistFile: " << s << endl;
+    settings->setValue("location/songlist", s);
 }
 
 
-void MainWindow::selectPlaylistFile()
+bool MainWindow::selectAndSetSonglistFile(QString &s, const bool criticalWarning, const QString &buttonText)
 {
+    s = this->promptForFile("Please select a songlist");
+    if (!QFile::exists(s)) {
+        this->displayError("File not found.", "\"" + s + "\" is not a valid file.", criticalWarning, buttonText);
+        return false;
+    }
+    
+    QFile f(s);
+    if (!f.open(QIODevice::ReadOnly)) {
+        this->displayError("File not accessible.", "Unable to read file \"" + s + "\"", criticalWarning, buttonText);
+        return false;
+    }
+
+    QTextStream in(&f);
+    if (!playlist->createSongMapFromFile(in)) {
+        this->displayError("Invalid file.", "Content of file \"" + s + "\" is not correctly formatted.", criticalWarning, buttonText);
+        return false;
+    }
+    return true;
 }
 
 
-void MainWindow::selectOSTDirectoy()
+void MainWindow::selectAndSetPlaylistFile_cb()
 {
-    qDebug() << "selectOSTDirectoy";
-    //playlist->setOSTdirectory(this->selectDirectoy(tr("Select OST directory")));
-    QString dir = QFileDialog::getExistingDirectory(this, 
-                    tr("Select OST directory"), 
-                    QDir::homePath(), 
-                    QFileDialog::ShowDirsOnly);
-    qDebug() << dir;
+    QString s;
+    if (!this->selectAndSetPlaylistFile(s)) {
+        //this->close();
+        return;
+    }
+    QTextStream(stdout) << "New PlaylistFile: " << s << endl;
+    settings->setValue("location/playlist", s);
+}
+
+
+bool MainWindow::selectAndSetPlaylistFile(QString &s, const bool criticalWarning, const QString &buttonText)
+{
+    s = this->promptForFile("Please select a playlist");
+    if (!QFile::exists(s)) {
+        this->displayError("File not found.", "\"" + s + "\" is not a valid file.", criticalWarning, buttonText);
+        return false;
+    }
+    
+    QFile f(s);
+    if (!f.open(QIODevice::ReadOnly)) {
+        this->displayError("File not accessible.", "Unable to read file \"" + s + "\"", criticalWarning, buttonText);
+        return false;
+    }
+
+    QTextStream in(&f);
+    if (!playlist->createPlaylistFromFile(in)) {
+        this->displayError("Invalid file.", "Content of file \"" + s + "\" is not correctly formatted.", criticalWarning, buttonText);
+        return false;
+    }
+    return true;
+}
+
+
+void MainWindow::selectAndSetOSTDirectory_cb()
+{
+    QString s;
+    if (!this->selectAndSetOSTDirectory(s)) {
+        //this->close();
+        return;
+    }
+    QTextStream(stdout) << "New OSTDirectory: " << s << endl;
+    settings->setValue("location/ost", s);
+}
+
+
+bool MainWindow::selectAndSetOSTDirectory(QString &s, const bool criticalWarning, const QString &buttonText)
+{
+    s = QFileDialog::getExistingDirectory(this, 
+            tr("Select OST directory"), 
+            QDir::homePath(), 
+            QFileDialog::ShowDirsOnly);
+    if (s.isNull() || s.isEmpty()) {
+        this->displayError("Invalid directory.", "\"" + s + "\" is not a valid directory.", criticalWarning, buttonText);
+        return false;
+    }
+    playlist->setOSTDirectory(s);
+    return true;
+}
+
+
+void MainWindow::displayError(const QString &errorText, const QString &informativeText, const bool criticalWarning, const QString &buttonText)
+{
+    QTextStream(stderr) << errorText << " => " << informativeText << endl;
+    QMessageBox msg;
+    msg.setIcon(criticalWarning ? QMessageBox::Critical : QMessageBox::Warning);
+    msg.setText(errorText);
+    msg.setInformativeText(informativeText);
+    msg.addButton(buttonText, QMessageBox::AcceptRole);
+    msg.exec();
+}
+
+
+QString MainWindow::promptForFile(const QString &prompt)
+{
+    return QFileDialog::getOpenFileName(0, 
+            prompt,
+            //"Please select a songlist (" + s + ")", 
+            //QDir::homePath()
+            "");
 }
 
 

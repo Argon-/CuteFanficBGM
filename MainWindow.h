@@ -20,8 +20,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *player);
     ~MainWindow();
-    void init();
-
 
 private:
     const int max_volume;
@@ -68,8 +66,15 @@ private:
     Playlist *playlist;
     LoopingPlayer *player;
 
+    void displayError(const QString &errorText, const QString &informativeText, const bool criticalWarning = true, const QString &buttonText = "Quit");
+    QString promptForFile(const QString &prompt);
+
+    bool selectAndSetSonglistFile(QString &s, const bool criticalWarning = false, const QString &buttonText = "Ok");
+    bool selectAndSetPlaylistFile(QString &s, const bool criticalWarning = false, const QString &buttonText = "Ok");
+    bool selectAndSetOSTDirectory(QString &s, const bool criticalWarning = false, const QString &buttonText = "Ok");
 
 private slots:
+    void init();
     void playpause_cb();
     void proceed_cb();
     void reset_cb();
@@ -78,9 +83,9 @@ private slots:
     void song_prev_cb();
     void song_next_cb();
     void slider_volume_cb(int value);
-    void selectSonglistFile();
-    void selectPlaylistFile();
-    void selectOSTDirectoy();
+    void selectAndSetSonglistFile_cb();
+    void selectAndSetPlaylistFile_cb();
+    void selectAndSetOSTDirectory_cb();
     void toggleAlwaysOnTop();
 
 };
