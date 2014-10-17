@@ -69,9 +69,9 @@ private:
     void displayError(const QString &errorText, const QString &informativeText, const bool criticalWarning = true, const QString &buttonText = "Quit");
     QString promptForFile(const QString &prompt);
 
-    bool selectAndSetSonglistFile(QString &s, const bool criticalWarning = false, const QString &buttonText = "Ok");
-    bool selectAndSetPlaylistFile(QString &s, const bool criticalWarning = false, const QString &buttonText = "Ok");
-    bool selectAndSetOSTDirectory(QString &s, const bool criticalWarning = false, const QString &buttonText = "Ok");
+    bool selectAndSetSonglistFile(QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
+    bool selectAndSetPlaylistFile(QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
+    bool selectAndSetOSTDirectory(QString &s, const bool criticalWarning = false, const QString &buttonText = "O");
 
 private slots:
     void init();
