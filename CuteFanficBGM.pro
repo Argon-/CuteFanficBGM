@@ -2,15 +2,14 @@ QT       += core gui phonon
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = CuteFanficBGM
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        MainWindow.cpp \
-        Playlist.cpp \
-        LoopingPlayer.cpp
+TARGET = CuteFanficBGM
 
-HEADERS  += MainWindow.h \
-        Playlist.h \
-        LoopingPlayer.h
+DESTDIR     = 
+OBJECTS_DIR = objects
+MOC_DIR     = generated
+
+SOURCES += src/*.cpp
+HEADERS += src/*.h
