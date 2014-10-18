@@ -4,6 +4,16 @@
 #include <QTextStream>
 
 
+class PlaylistStatus {
+public:
+    enum StatusEnum {
+        OK, Error, NoSongMapSet, NoPlaylistSet, SongMapParseFailure, PlaylistParseFailure
+    };
+private:
+    PlaylistStatus();
+};
+
+
 class Playlist
 {
 
@@ -11,9 +21,9 @@ public:
     explicit Playlist();
     ~Playlist();
     void init();
-    void setOSTDirectory(const QString &s);
-    bool createSongMapFromFile(QTextStream &in);
-    bool createPlaylistFromFile(QTextStream &in);
+    PlaylistStatus::StatusEnum setOSTDirectory(const QString &s);
+    PlaylistStatus::StatusEnum createSongMapFromFile(const QTextStream &in);
+    PlaylistStatus::StatusEnum createPlaylistFromFile(const QTextStream &in);
 
 };
 

@@ -2,27 +2,27 @@
 #include <QDebug>
 
 
-
 Playlist::Playlist()
 {
     qDebug() << "Created Playlist";
 }
 
 
-bool Playlist::createSongMapFromFile(QTextStream &in)
+PlaylistStatus::StatusEnum Playlist::createSongMapFromFile(const QTextStream &in)
 {
-    return true;
+    return PlaylistStatus::OK;
 }
 
 
-bool Playlist::createPlaylistFromFile(QTextStream &in)
+PlaylistStatus::StatusEnum Playlist::createPlaylistFromFile(const QTextStream &in)
 {
-    return true;
+    return PlaylistStatus::OK;
 }
 
 
-void Playlist::setOSTDirectory(const QString &s)
+PlaylistStatus::StatusEnum Playlist::setOSTDirectory(const QString &s)
 {
+    return PlaylistStatus::OK;
 }
 
 

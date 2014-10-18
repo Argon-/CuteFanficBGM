@@ -282,13 +282,13 @@ bool MainWindow::selectAndSetSonglistFile(QString &s, const bool criticalWarning
     }
     
     QFile f(s);
-    if (!f.open(QIODevice::ReadOnly)) {
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         this->displayError("File not accessible.", "Unable to read file \"" + s + "\"", criticalWarning, buttonText);
         return false;
     }
 
     QTextStream in(&f);
-    if (!playlist->createSongMapFromFile(in)) {
+    if (playlist->createSongMapFromFile(in) != PlaylistStatus::OK) {
         this->displayError("Invalid file.", "Content of file \"" + s + "\" is not correctly formatted.", criticalWarning, buttonText);
         return false;
     }
@@ -317,13 +317,13 @@ bool MainWindow::selectAndSetPlaylistFile(QString &s, const bool criticalWarning
     }
     
     QFile f(s);
-    if (!f.open(QIODevice::ReadOnly)) {
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
         this->displayError("File not accessible.", "Unable to read file \"" + s + "\"", criticalWarning, buttonText);
         return false;
     }
 
     QTextStream in(&f);
-    if (!playlist->createPlaylistFromFile(in)) {
+    if (playlist->createPlaylistFromFile(in) != PlaylistStatus::OK) {
         this->displayError("Invalid file.", "Content of file \"" + s + "\" is not correctly formatted.", criticalWarning, buttonText);
         return false;
     }
