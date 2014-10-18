@@ -6,7 +6,6 @@
 LoopingPlayer::LoopingPlayer() : 
     audioConnected(false)
 {
-    qDebug() << "Created Player";
 }
 
 
