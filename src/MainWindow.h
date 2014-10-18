@@ -59,7 +59,7 @@ private:
     QMenu *menu_settings;
     QAction *act_selectPlaylist;
     QAction *act_selectSonglist;
-    QAction *act_selectOSTDirectoy;
+    QAction *act_selectSongDirectoy;
     QAction *act_always_on_top;
 
     QSettings *settings;
@@ -69,9 +69,9 @@ private:
     void displayError(const QString &errorText, const QString &informativeText, const bool criticalWarning = true, const QString &buttonText = "Quit");
     QString promptForFile(const QString &prompt);
 
-    bool selectAndSetSonglistFile(QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
-    bool selectAndSetPlaylistFile(QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
-    bool selectAndSetOSTDirectory(QString &s, const bool criticalWarning = false, const QString &buttonText = "O");
+    bool setPlaylistFile(const QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
+    bool setSonglistFile(const QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
+    bool setSongDirectory(const QString &s, const bool criticalWarning = false, const QString &buttonText = "O");
 
 private slots:
     void init();
@@ -83,9 +83,9 @@ private slots:
     void song_prev_cb();
     void song_next_cb();
     void slider_volume_cb(int value);
-    void selectAndSetSonglistFile_cb();
     void selectAndSetPlaylistFile_cb();
-    void selectAndSetOSTDirectory_cb();
+    void selectAndSetSonglistFile_cb();
+    void selectAndSetSongDirectory_cb();
     void toggleAlwaysOnTop();
 
 };
