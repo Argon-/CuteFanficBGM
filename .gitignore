@@ -1,3 +1,4 @@
+.DS_Store
 *.o
 *.app
 test*.mp3
