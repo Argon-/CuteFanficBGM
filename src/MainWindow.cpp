@@ -148,25 +148,25 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
 void MainWindow::init() {
     QString path;
 
-    // retrieve playlist
-    path = settings->value("location/playlist", "Sisterhood.txt").toString();
+    // retrieve song dir
+    path = settings->value("location/songs", "/").toString();
     if (!QFile::exists(path)) {
-        path = this->promptForFile("Please select a playlist");
+        path = QFileDialog::getExistingDirectory(this, tr("Select song directory"), QDir::homePath(), QFileDialog::ShowDirsOnly);
     }
-    if (!this->setPlaylistFile(path, true, "Quit")) {
+    if (!this->setSongDirectory(path, true, tr("Quit"))) {
         this->close();
         return;
     }
-    settings->setValue("location/playlist", path);
-    qDebug() << "playlist: " << path;
+    settings->setValue("location/songs", path);
+    qDebug() << "song dir: " << path;
 
     
     // retrieve songlist
     path = settings->value("location/songlist", "Songlist.txt").toString();
     if (!QFile::exists(path)) {
-        path = this->promptForFile("Please select a songlist");
+        path = this->promptForFile(tr("Please select a songlist"));
     }
-    if (!this->setSonglistFile(path, true, "Quit")) {
+    if (!this->setSonglistFile(path, true, tr("Quit"))) {
         this->close();
         return;
     }
@@ -174,17 +174,30 @@ void MainWindow::init() {
     qDebug() << "songlist: " << path;
 
 
-    // retrieve song dir
-    path = settings->value("location/songs").toString();
-    if (!QFile::exists(path)) {
-        path = QFileDialog::getExistingDirectory(this, tr("Select song directory"), QDir::homePath(), QFileDialog::ShowDirsOnly);
-    }
-    if (!this->setSongDirectory(path, true, "Quit")) {
+    // check if every song actually exists
+    if (playlist->checkSongDirectory() != PlaylistStatus::OK) {
+        this->displayError(tr("File(s) not found."), 
+                           tr("One or more songs were not found. See log for details."), 
+                           true, tr("Quit"));
         this->close();
         return;
     }
-    settings->setValue("location/songs", path);
-    qDebug() << "song dir: " << path;
+
+
+    // retrieve playlist
+    path = settings->value("location/playlist", "Sisterhood.txt").toString();
+    if (!QFile::exists(path)) {
+        path = this->promptForFile(tr("Please select a playlist"));
+    }
+    if (!this->setPlaylistFile(path, true, tr("Quit"))) {
+        this->close();
+        return;
+    }
+    settings->setValue("location/playlist", path);
+    qDebug() << "playlist: " << path;
+
+
+
 
 
 
@@ -194,11 +207,12 @@ void MainWindow::init() {
 
 
     player->testSetAudioChain();
-    player->setCurrentTrack(QString(tr("resources/test2.mp3")));
+    player->setCurrentTrack(QString("resources/test2.mp3"));
     // load settings, e.g. last pos and start playback, volume, file locations
     //this->playpause_cb();
     btn_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
     act_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
+    this->l_title->setText(playlist->getTitle());
 }
 
 
@@ -265,7 +279,7 @@ void MainWindow::slider_volume_cb(int value)
 
 void MainWindow::selectAndSetSonglistFile_cb()
 {
-    QString s = this->promptForFile("Please select a songlist");
+    QString s = this->promptForFile(tr("Please select a songlist"));
     if (!this->setSonglistFile(s)) {
         return;
     }
@@ -278,19 +292,33 @@ void MainWindow::selectAndSetSonglistFile_cb()
 bool MainWindow::setSonglistFile(const QString &s, const bool criticalWarning, const QString &buttonText)
 {
     if (!QFile::exists(s)) {
-        this->displayError("File not found.", "\"" + s + "\" is not a valid file.", criticalWarning, buttonText);
+        this->displayError(tr("File not found."), 
+                           "\"" + s + tr("\" is not a valid file."), 
+                           criticalWarning, buttonText);
         return false;
     }
     
     QFile f(s);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        this->displayError("File not accessible.", "Unable to read file \"" + s + "\"", criticalWarning, buttonText);
+        this->displayError(tr("File not accessible."), 
+                           tr("Unable to read file \"") + s + "\"", 
+                           criticalWarning, buttonText);
         return false;
     }
 
     QTextStream in(&f);
-    if (playlist->createSongMapFromFile(in) != PlaylistStatus::OK) {
-        this->displayError("Invalid file.", "Content of file \"" + s + "\" is not correctly formatted.", criticalWarning, buttonText);
+    PlaylistStatus::StatusEnum r = playlist->createSongMapFromFile(in);
+    if (r != PlaylistStatus::OK) {
+        if (r == PlaylistStatus::ParseFailure) {
+            this->displayError(tr("Invalid file."), 
+                               playlist->getLastParseError(), 
+                               criticalWarning, buttonText);
+        }
+        else {
+            this->displayError(tr("Invalid file."), 
+                               tr("Content of file \"") + s + tr("\" is not correctly formatted."), 
+                               criticalWarning, buttonText);
+        }
         return false;
     }
     return true;
@@ -299,7 +327,7 @@ bool MainWindow::setSonglistFile(const QString &s, const bool criticalWarning, c
 
 void MainWindow::selectAndSetPlaylistFile_cb()
 {
-    QString s = this->promptForFile("Please select a playlist");
+    QString s = this->promptForFile(tr("Please select a playlist"));
     if (!this->setPlaylistFile(s)) {
         return;
     }
@@ -312,19 +340,33 @@ void MainWindow::selectAndSetPlaylistFile_cb()
 bool MainWindow::setPlaylistFile(const QString &s, const bool criticalWarning, const QString &buttonText)
 {
     if (!QFile::exists(s)) {
-        this->displayError("File not found.", "\"" + s + "\" is not a valid file.", criticalWarning, buttonText);
+        this->displayError(tr("File not found."), 
+                           "\"" + s + tr("\" is not a valid file."), 
+                           criticalWarning, buttonText);
         return false;
     }
     
     QFile f(s);
     if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        this->displayError("File not accessible.", "Unable to read file \"" + s + "\"", criticalWarning, buttonText);
+        this->displayError(tr("File not accessible."), 
+                           tr("Unable to read file \"") + s + "\"", 
+                           criticalWarning, buttonText);
         return false;
     }
 
     QTextStream in(&f);
-    if (playlist->createPlaylistFromFile(in) != PlaylistStatus::OK) {
-        this->displayError("Invalid file.", "Content of file \"" + s + "\" is not correctly formatted.", criticalWarning, buttonText);
+    PlaylistStatus::StatusEnum r = playlist->createPlaylistFromFile(in);
+    if (r != PlaylistStatus::OK) {
+        if (r == PlaylistStatus::ParseFailure) {
+            this->displayError(tr("Invalid file."), 
+                               playlist->getLastParseError(), 
+                               criticalWarning, buttonText);
+        }
+        else {
+            this->displayError(tr("Invalid file."), 
+                               tr("Content of file \"") + s + tr("\" is not correctly formatted."), 
+                               criticalWarning, buttonText);
+        }
         return false;
     }
     return true;
@@ -333,7 +375,9 @@ bool MainWindow::setPlaylistFile(const QString &s, const bool criticalWarning, c
 
 void MainWindow::selectAndSetSongDirectory_cb()
 {
-    QString s = QFileDialog::getExistingDirectory(this, tr("Select song directory"), QDir::homePath(), QFileDialog::ShowDirsOnly);
+    QString s = QFileDialog::getExistingDirectory(this, 
+                    tr("Select song directory"), 
+                    QDir::homePath(), QFileDialog::ShowDirsOnly);
     if (!this->setSongDirectory(s)) {
         return;
     }
@@ -346,12 +390,16 @@ void MainWindow::selectAndSetSongDirectory_cb()
 bool MainWindow::setSongDirectory(const QString &s, const bool criticalWarning, const QString &buttonText)
 {
     if (s.isNull() || s.isEmpty() || !QDir(s).exists()) {
-        this->displayError("Invalid directory.", "\"" + s + "\" is not a valid directory.", criticalWarning, buttonText);
+        this->displayError(tr("Invalid directory."), 
+                           "\"" + s + tr("\" is not a valid directory."), 
+                           criticalWarning, buttonText);
         return false;
     }
 
     if (playlist->setSongDirectory(s) != PlaylistStatus::OK) {
-        this->displayError("Invalid directory.", "\"" + s + "\" is not a valid directory.", criticalWarning, buttonText);
+        this->displayError(tr("Invalid directory."), 
+                           "\"" + s + tr("\" is not a valid directory."), 
+                           criticalWarning, buttonText);
         return false;
     }
     return true;
