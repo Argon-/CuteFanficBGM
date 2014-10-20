@@ -114,7 +114,10 @@ QString Playlist::getCurrentSong() {
 
 QString Playlist::getCurrentSongName() {
     this->lastStatus = PlaylistStatus::OK;
-    return this->songMap.value(*currentSong, "???");
+    QString s = this->songMap.value(*currentSong, "???");
+    // probably better to use QFileInfo::basename but it uses QFile internally 
+    // for this simple task
+    return s.left(s.lastIndexOf("."));
 }
 
 

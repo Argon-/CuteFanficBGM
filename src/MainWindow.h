@@ -31,11 +31,13 @@ private:
     QGridLayout *layout_main_ctrl;
     QHBoxLayout *layout_ch_ctrl;
     QHBoxLayout *layout_song_ctrl;
+    QHBoxLayout *layout_song_title;
     QHBoxLayout *layout_volume_ctrl;
 
     QLabel *l_title;
-    QLabel *l_ch;
-    QLabel *l_song;
+    QLabel *l_ch_ctrl;
+    QLabel *l_song_ctrl;
+    QLabel *l_song_title;
 
     QPushButton *btn_playpause;
     QPushButton *btn_proceed;

@@ -12,10 +12,12 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     layout_main_ctrl(new QGridLayout(parent)),
     layout_ch_ctrl(new QHBoxLayout(parent)),
     layout_song_ctrl(new QHBoxLayout(parent)),
+    layout_song_title(new QHBoxLayout(parent)),
     layout_volume_ctrl(new QHBoxLayout(parent)),
     l_title(new QLabel(tr("title"), this)),
-    l_ch(new QLabel(tr("chapter"), this)),
-    l_song(new QLabel(tr("song"), this)),
+    l_ch_ctrl(new QLabel(tr("chapter"), this)),
+    l_song_ctrl(new QLabel(tr("song"), this)),
+    l_song_title(new QLabel(tr(""), this)),
     btn_playpause(new QPushButton(tr("Play"), this)),
     btn_proceed(new QPushButton(tr("&Proceed"), this)),
     btn_reset(new QPushButton(tr("Reset"), this)),
@@ -53,12 +55,14 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     // set size policies
     l_title->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     l_title->setAlignment(Qt::AlignLeft);
-    l_ch->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    l_ch->setAlignment(Qt::AlignVCenter);
-    l_ch->setAlignment(Qt::AlignHCenter);
-    l_song->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    l_song->setAlignment(Qt::AlignVCenter);
-    l_song->setAlignment(Qt::AlignHCenter);
+    l_ch_ctrl->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    l_ch_ctrl->setAlignment(Qt::AlignVCenter);
+    l_ch_ctrl->setAlignment(Qt::AlignHCenter);
+    l_song_ctrl->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    l_song_ctrl->setAlignment(Qt::AlignVCenter);
+    l_song_ctrl->setAlignment(Qt::AlignHCenter);
+    l_song_title->setAlignment(Qt::AlignVCenter);
+    l_song_title->setAlignment(Qt::AlignHCenter);
     btn_playpause->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
     btn_proceed->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     btn_reset->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
@@ -73,17 +77,19 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     layout_main_ctrl->addWidget(btn_proceed, 0, 1, Qt::AlignHCenter);
     layout_main_ctrl->addWidget(btn_reset, 0, 2, Qt::AlignRight);
     layout_ch_ctrl->addWidget(btn_ch_prev);
-    layout_ch_ctrl->addWidget(l_ch);
+    layout_ch_ctrl->addWidget(l_ch_ctrl);
     layout_ch_ctrl->addWidget(btn_ch_next);
     layout_song_ctrl->addWidget(btn_song_prev);
-    layout_song_ctrl->addWidget(l_song);
+    layout_song_ctrl->addWidget(l_song_ctrl);
     layout_song_ctrl->addWidget(btn_song_next);
+    layout_song_title->addWidget(l_song_title);
     layout_volume_ctrl->addWidget(slider_volume);
 
     layout->addLayout(layout_title);
     layout->addLayout(layout_main_ctrl);
     layout->addLayout(layout_ch_ctrl);
     layout->addLayout(layout_song_ctrl);
+    layout->addLayout(layout_song_title);
     layout->addLayout(layout_volume_ctrl);
     centralWidget->setLayout(this->layout);
     this->setCentralWidget(this->centralWidget);
@@ -215,8 +221,9 @@ void MainWindow::init() {
     btn_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
     act_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
     this->l_title->setText(playlist->getTitle());
-    this->l_ch->setText(playlist->getCurrentChapter());
-    this->l_song->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
+    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
 
@@ -241,6 +248,8 @@ void MainWindow::playpause_cb()
 void MainWindow::proceed_cb()
 {
     qDebug() << "proceed_cb";
+    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
 
@@ -255,8 +264,9 @@ void MainWindow::ch_prev_cb()
 {
     qDebug() << "ch_prev_cb";
     playlist->prevChapter();
-    this->l_ch->setText(playlist->getCurrentChapter());
-    this->l_song->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
+    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
 
@@ -264,8 +274,9 @@ void MainWindow::ch_next_cb()
 {
     qDebug() << "ch_next_cb";
     playlist->nextChapter();
-    this->l_ch->setText(playlist->getCurrentChapter());
-    this->l_song->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
+    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
 
@@ -273,7 +284,8 @@ void MainWindow::song_prev_cb()
 {
     qDebug() << "song_prev_cb";
     playlist->prevSong();
-    this->l_song->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
 
@@ -281,7 +293,8 @@ void MainWindow::song_next_cb()
 {
     qDebug() << "song_next_cb";
     playlist->nextSong();
-    this->l_song->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
 
