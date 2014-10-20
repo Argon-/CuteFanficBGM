@@ -11,7 +11,7 @@ class PlaylistStatus {
 public:
     enum StatusEnum {
         OK, 
-        Error, 
+        Uninitialized, 
         EmptyFile, 
         EmptySongDirectory, 
         PartialSongDirectory,
@@ -36,9 +36,18 @@ public:
     PlaylistStatus::StatusEnum createSongMapFromFile(QTextStream &in);
     PlaylistStatus::StatusEnum setSongDirectory(const QString &s);
     PlaylistStatus::StatusEnum checkSongDirectory();
+
     PlaylistStatus::StatusEnum status();
+    PlaylistStatus::StatusEnum nextChapter();
+    PlaylistStatus::StatusEnum prevChapter();
+    PlaylistStatus::StatusEnum nextSong();
+    PlaylistStatus::StatusEnum prevSong();
+    QString getCurrentChapter();
+    QString getCurrentSong();
+    QString getCurrentSongName();
     QString getLastParseError();
     QString getTitle();
+    void printPlaylist();
 
 private:
     inline QString getSongPath(const QString &s);

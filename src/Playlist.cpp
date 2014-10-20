@@ -21,6 +21,103 @@ Playlist::Playlist(const QString &playListSeparator,
 }
 
 
+PlaylistStatus::StatusEnum Playlist::nextChapter() {
+    if (this->playList.isEmpty()) {
+        this->lastStatus = PlaylistStatus::Uninitialized;
+        return this->lastStatus;
+    }
+
+    if (this->playList.size() > 1) {
+        ++this->currentChapter;
+        if (this->currentChapter == this->playList.constEnd())
+            this->currentChapter = this->playList.constBegin();
+    }
+    this->currentSong = this->currentChapter->second.constBegin();
+    this->lastStatus = PlaylistStatus::OK;
+    return this->lastStatus;
+}
+
+
+PlaylistStatus::StatusEnum Playlist::prevChapter() {
+    if (this->playList.isEmpty()) {
+        this->lastStatus = PlaylistStatus::Uninitialized;
+        return this->lastStatus;
+    }
+
+    if (this->playList.size() > 1) {
+        if (this->currentChapter == this->playList.constBegin())
+            this->currentChapter = this->playList.constEnd();
+        --this->currentChapter;
+    }
+    this->currentSong = this->currentChapter->second.constBegin();
+    this->lastStatus = PlaylistStatus::OK;
+    return this->lastStatus;
+}
+
+
+PlaylistStatus::StatusEnum Playlist::nextSong() {
+    if (this->currentChapter->second.isEmpty()) {
+        this->lastStatus = PlaylistStatus::Uninitialized;
+        return this->lastStatus;
+    }
+
+    if (this->currentChapter->second.size() > 1) {
+        ++this->currentSong;
+        if (this->currentSong == this->currentChapter->second.constEnd())
+            this->currentSong = this->currentChapter->second.constBegin();
+    }
+    this->lastStatus = PlaylistStatus::OK;
+    return this->lastStatus;
+}
+
+
+PlaylistStatus::StatusEnum Playlist::prevSong() {
+    if (this->currentChapter->second.isEmpty()) {
+        this->lastStatus = PlaylistStatus::Uninitialized;
+        return this->lastStatus;
+    }
+
+    if (this->currentChapter->second.size() > 1) {
+        if (this->currentSong == this->currentChapter->second.constBegin())
+            this->currentSong = this->currentChapter->second.constEnd();
+        --this->currentSong;
+    }
+    this->lastStatus = PlaylistStatus::OK;
+    return this->lastStatus;
+}
+
+
+void Playlist::printPlaylist()
+{
+    QList<QPair<QString, QList<int> > >::const_iterator i;
+        for (i = playList.constBegin(); i != playList.constEnd(); ++i) {
+            qDebug() << "Currently at:" << i->first;
+            QList<int>::const_iterator e;
+            for (e = i->second.constBegin(); e != i->second.constEnd(); ++e) {
+                qDebug() << "   " << *e << " (" << this->songMap.value(*e, "???") << ")";
+            }
+        }
+}
+
+
+QString Playlist::getCurrentChapter() {
+    return currentChapter->first;
+}
+
+
+QString Playlist::getCurrentSong() {
+    this->lastStatus = PlaylistStatus::OK;
+    qDebug() << "Playlist::getCurrentSong:" << *this->currentSong;
+    return QString::number(*this->currentSong);
+}
+
+
+QString Playlist::getCurrentSongName() {
+    this->lastStatus = PlaylistStatus::OK;
+    return this->songMap.value(*currentSong, "???");
+}
+
+
 PlaylistStatus::StatusEnum Playlist::createPlaylistFromFile(QTextStream &in)
 {
     // empty file?
@@ -62,7 +159,6 @@ PlaylistStatus::StatusEnum Playlist::createPlaylistFromFile(QTextStream &in)
         }
 
         QString chapter = split.takeFirst();
-        qDebug() << "chapter:" << chapter;
 
         // create list of song ids
         // this might actually be empty, that's fine
@@ -189,24 +285,28 @@ PlaylistStatus::StatusEnum Playlist::checkSongDirectory()
 
 inline QString Playlist::getSongPath(const QString &s)
 {
+    this->lastStatus = PlaylistStatus::OK;
     return this->songDirectory + QDir::separator() + s;
 }
 
 
 QString Playlist::getTitle()
 {
+    this->lastStatus = PlaylistStatus::OK;
     return this->title;
 }
 
 
 PlaylistStatus::StatusEnum Playlist::status()
 {
+    this->lastStatus = PlaylistStatus::OK;
     return this->lastStatus;
 }
 
 
 QString Playlist::getLastParseError()
 {
+    this->lastStatus = PlaylistStatus::OK;
     return this->lastParseError;
 }
 
