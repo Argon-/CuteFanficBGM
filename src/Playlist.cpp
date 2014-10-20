@@ -69,7 +69,7 @@ PlaylistStatus::StatusEnum Playlist::nextSong(bool turnAround)
     if (this->currentChapter->second.size() > 1) {
         ++this->currentSong;
         if (this->currentSong == this->currentChapter->second.constEnd()) {
-            if (turnAround) {
+            if (!turnAround) {
                 this->nextChapter();
             }
             this->currentSong = this->currentChapter->second.constBegin();
@@ -89,7 +89,7 @@ PlaylistStatus::StatusEnum Playlist::prevSong(bool turnAround)
 
     if (this->currentChapter->second.size() > 1) {
         if (this->currentSong == this->currentChapter->second.constBegin()) {
-            if (turnAround) {
+            if (!turnAround) {
                 this->prevChapter();
             }
             this->currentSong = this->currentChapter->second.constEnd();

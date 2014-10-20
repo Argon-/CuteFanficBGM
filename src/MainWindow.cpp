@@ -248,7 +248,7 @@ void MainWindow::playpause_cb()
 void MainWindow::proceed_cb()
 {
     qDebug() << "proceed_cb";
-    playlist->nextSong(true);
+    playlist->nextSong(false);
     this->l_ch_ctrl->setText(playlist->getCurrentChapter());
     this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
     this->l_song_title->setText(playlist->getCurrentSongName());
