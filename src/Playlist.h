@@ -40,8 +40,9 @@ public:
     PlaylistStatus::StatusEnum status();
     PlaylistStatus::StatusEnum nextChapter();
     PlaylistStatus::StatusEnum prevChapter();
-    PlaylistStatus::StatusEnum nextSong();
-    PlaylistStatus::StatusEnum prevSong();
+    PlaylistStatus::StatusEnum nextSong(bool turnAround = false);
+    PlaylistStatus::StatusEnum prevSong(bool turnAround = false);
+    PlaylistStatus::StatusEnum reset();
     QString getCurrentChapter();
     QString getCurrentSong();
     QString getCurrentSongName();

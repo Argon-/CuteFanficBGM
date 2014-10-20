@@ -248,6 +248,8 @@ void MainWindow::playpause_cb()
 void MainWindow::proceed_cb()
 {
     qDebug() << "proceed_cb";
+    playlist->nextSong(true);
+    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
     this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
     this->l_song_title->setText(playlist->getCurrentSongName());
 }
@@ -256,7 +258,10 @@ void MainWindow::proceed_cb()
 void MainWindow::reset_cb()
 {
     qDebug() << "reset_cb";
-    playlist->printPlaylist();
+    playlist->reset();
+    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
+    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
 
@@ -284,6 +289,7 @@ void MainWindow::song_prev_cb()
 {
     qDebug() << "song_prev_cb";
     playlist->prevSong();
+    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
     this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
     this->l_song_title->setText(playlist->getCurrentSongName());
 }
@@ -293,6 +299,7 @@ void MainWindow::song_next_cb()
 {
     qDebug() << "song_next_cb";
     playlist->nextSong();
+    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
     this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
     this->l_song_title->setText(playlist->getCurrentSongName());
 }

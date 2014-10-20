@@ -21,7 +21,8 @@ Playlist::Playlist(const QString &playListSeparator,
 }
 
 
-PlaylistStatus::StatusEnum Playlist::nextChapter() {
+PlaylistStatus::StatusEnum Playlist::nextChapter() 
+{
     if (this->playList.isEmpty()) {
         this->lastStatus = PlaylistStatus::Uninitialized;
         return this->lastStatus;
@@ -29,8 +30,9 @@ PlaylistStatus::StatusEnum Playlist::nextChapter() {
 
     if (this->playList.size() > 1) {
         ++this->currentChapter;
-        if (this->currentChapter == this->playList.constEnd())
+        if (this->currentChapter == this->playList.constEnd()) {
             this->currentChapter = this->playList.constBegin();
+        }
     }
     this->currentSong = this->currentChapter->second.constBegin();
     this->lastStatus = PlaylistStatus::OK;
@@ -38,15 +40,17 @@ PlaylistStatus::StatusEnum Playlist::nextChapter() {
 }
 
 
-PlaylistStatus::StatusEnum Playlist::prevChapter() {
+PlaylistStatus::StatusEnum Playlist::prevChapter() 
+{
     if (this->playList.isEmpty()) {
         this->lastStatus = PlaylistStatus::Uninitialized;
         return this->lastStatus;
     }
 
     if (this->playList.size() > 1) {
-        if (this->currentChapter == this->playList.constBegin())
+        if (this->currentChapter == this->playList.constBegin()) {
             this->currentChapter = this->playList.constEnd();
+        }
         --this->currentChapter;
     }
     this->currentSong = this->currentChapter->second.constBegin();
@@ -55,7 +59,8 @@ PlaylistStatus::StatusEnum Playlist::prevChapter() {
 }
 
 
-PlaylistStatus::StatusEnum Playlist::nextSong() {
+PlaylistStatus::StatusEnum Playlist::nextSong(bool turnAround)
+ {
     if (this->currentChapter->second.isEmpty()) {
         this->lastStatus = PlaylistStatus::Uninitialized;
         return this->lastStatus;
@@ -63,25 +68,53 @@ PlaylistStatus::StatusEnum Playlist::nextSong() {
 
     if (this->currentChapter->second.size() > 1) {
         ++this->currentSong;
-        if (this->currentSong == this->currentChapter->second.constEnd())
+        if (this->currentSong == this->currentChapter->second.constEnd()) {
+            if (turnAround) {
+                this->nextChapter();
+            }
             this->currentSong = this->currentChapter->second.constBegin();
+        }
     }
     this->lastStatus = PlaylistStatus::OK;
     return this->lastStatus;
 }
 
 
-PlaylistStatus::StatusEnum Playlist::prevSong() {
+PlaylistStatus::StatusEnum Playlist::prevSong(bool turnAround) 
+{
     if (this->currentChapter->second.isEmpty()) {
         this->lastStatus = PlaylistStatus::Uninitialized;
         return this->lastStatus;
     }
 
     if (this->currentChapter->second.size() > 1) {
-        if (this->currentSong == this->currentChapter->second.constBegin())
+        if (this->currentSong == this->currentChapter->second.constBegin()) {
+            if (turnAround) {
+                this->prevChapter();
+            }
             this->currentSong = this->currentChapter->second.constEnd();
+        }
         --this->currentSong;
     }
+    this->lastStatus = PlaylistStatus::OK;
+    return this->lastStatus;
+}
+
+
+PlaylistStatus::StatusEnum Playlist::reset() 
+{
+    if (this->playList.isEmpty()) {
+        this->lastStatus = PlaylistStatus::Uninitialized;
+        return this->lastStatus;
+    }
+    this->currentChapter = this->playList.constBegin();
+
+    if (this->currentChapter->second.isEmpty()) {
+        this->lastStatus = PlaylistStatus::Uninitialized;
+        return this->lastStatus;
+    }
+    this->currentSong = currentChapter->second.constBegin();
+
     this->lastStatus = PlaylistStatus::OK;
     return this->lastStatus;
 }
@@ -90,31 +123,33 @@ PlaylistStatus::StatusEnum Playlist::prevSong() {
 void Playlist::printPlaylist()
 {
     QList<QPair<QString, QList<int> > >::const_iterator i;
-        for (i = playList.constBegin(); i != playList.constEnd(); ++i) {
-            qDebug() << "Currently at:" << i->first;
-            QList<int>::const_iterator e;
-            for (e = i->second.constBegin(); e != i->second.constEnd(); ++e) {
-                qDebug() << "   " << *e << " (" << this->songMap.value(*e, "???") << ")";
-            }
+    for (i = playList.constBegin(); i != playList.constEnd(); ++i) {
+        QTextStream(stdout) << "Currently at: " << i->first << endl;
+        QList<int>::const_iterator e;
+        for (e = i->second.constBegin(); e != i->second.constEnd(); ++e) {
+            QTextStream(stdout) << "   " << *e << " (" << this->songMap.value(*e, "???") << ")" << endl;
         }
+    }
 }
 
 
-QString Playlist::getCurrentChapter() {
+QString Playlist::getCurrentChapter() 
+{
     return currentChapter->first;
 }
 
 
-QString Playlist::getCurrentSong() {
+QString Playlist::getCurrentSong() 
+{
     this->lastStatus = PlaylistStatus::OK;
-    qDebug() << "Playlist::getCurrentSong:" << *this->currentSong;
     return QString::number(*this->currentSong);
 }
 
 
-QString Playlist::getCurrentSongName() {
+QString Playlist::getCurrentSongName() 
+{
     this->lastStatus = PlaylistStatus::OK;
-    QString s = this->songMap.value(*currentSong, "???");
+    QString s = this->songMap.value(*currentSong, "");
     // probably better to use QFileInfo::basename but it uses QFile internally 
     // for this simple task
     return s.left(s.lastIndexOf("."));
