@@ -160,7 +160,7 @@ void MainWindow::init() {
     // retrieve song dir
     path = settings->value("location/songs", "/").toString();
     if (!QFile::exists(path)) {
-        path = QFileDialog::getExistingDirectory(this, tr("Select song directory"), QDir::homePath(), QFileDialog::ShowDirsOnly);
+        path = QFileDialog::getExistingDirectory(this, tr("Please select a song directory"), QDir::homePath(), QFileDialog::ShowDirsOnly);
     }
     if (!this->setSongDirectory(path, true, tr("Quit"))) {
         this->close();
@@ -186,7 +186,8 @@ void MainWindow::init() {
     // check if every song actually exists
     if (playlist->checkSongDirectory() != PlaylistStatus::OK) {
         this->displayError(tr("File(s) not found."), 
-                           tr("One or more songs were not found. See log for details."), 
+                           tr("One or more songs were not found. See log for details. \
+                              Try a different song directory or validate our songlist."), 
                            true, tr("Quit"));
         this->close();
         return;
