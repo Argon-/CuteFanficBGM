@@ -3,161 +3,134 @@
 #include <QTextStream>
 
 
+
 LoopingPlayer::LoopingPlayer() : 
-    audioConnected(false)
+    playingClicked(false),
+    mediaplayer(new QMediaPlayer(this)),
+    playlist(new QMediaPlaylist(mediaplayer))
 {
-}
+    //playlist->setPlaybackMode(QMediaPlaylist::Loop);
+    mediaplayer->setPlaylist(playlist);
 
-
-void LoopingPlayer::setUpAudioChain()
-{
-    mediaObject = new Phonon::MediaObject();
-    mediaObject->setTransitionTime(500);
-    audioOutput = new Phonon::AudioOutput(Phonon::NotificationCategory);
-    audioPath = Phonon::createPath(mediaObject, audioOutput);
-    connect(mediaObject, SIGNAL(aboutToFinish()), this, SLOT(aboutToFinish_cb()));
-    audioConnected = audioPath.isValid();
-}
-
-
-bool LoopingPlayer::testSetAudioChain()
-{
-    if (!audioConnected) {
-        this->setUpAudioChain();
-
-        if (audioConnected) {
-            QTextStream(stdout) << "Initialized audio chain" << endl;
-            //qDebug() << "Capabilities:";
-            //qDebug() << Phonon::BackendCapabilities::availableAudioOutputDevices();
-            //qDebug() << Phonon::BackendCapabilities::availableMimeTypes();
+    /*
+    if (mediaplayer->availability() == QMultimedia::Available) {
+        qDebug() << "Player available";
+        service = mediaplayer->service();
+        if (service != NULL) {
+            qDebug() << "   Retrieved service";
+            gaplessCtrl = qobject_cast<QMediaGaplessPlaybackControl *>(service->requestControl("org.qt-project.qt.mediaplayercontrol/5.0"));
+            if (gaplessCtrl != NULL) {
+                qDebug() << "      Retrieved QMediaGaplessPlaybackControl";
+                service->releaseControl(gaplessCtrl);
+                gaplessCtrl->setCrossfadeTime(5000);
+                qDebug() << "      Released QMediaGaplessPlaybackControl";
+            }
+            else {
+                qDebug() << "      QMediaGaplessPlaybackControl is null!";
+            }
         }
         else {
-            QTextStream(stdout) << "Initializing audio chain failed" << endl;
+            qDebug() << "   Service is null!";
         }
     }
-    return audioConnected;
-}
-
-
-void LoopingPlayer::play(const Phonon::MediaSource &cms)
-{
-    this->setCurrentTrack(cms);
-    this->play();
+    else {
+        qDebug() << "Player not available:" << mediaplayer->availability();
+    }
+    */
 }
 
 
 void LoopingPlayer::play()
 {
     qDebug() << "LoopingPlayer::play";
-    if (!this->testSetAudioChain()) {
-        return;
-    }
-    mediaObject->play();
-}
-
-
-void LoopingPlayer::enqueue(const Phonon::MediaSource &cms)
-{
-    this->currentSource = cms;
-    this->enqueue();
-}
-
-
-void LoopingPlayer::enqueue()
-{
-    if (!this->testSetAudioChain()) {
-        return;
-    }
-    mediaObject->enqueue(this->currentSource);
+    this->playingClicked = true;
+    mediaplayer->play();
 }
 
 
 void LoopingPlayer::pause()
 {
     qDebug() << "LoopingPlayer::pause";
-    if (!this->testSetAudioChain()) {
+    this->playingClicked = false;
+    mediaplayer->pause();
+}
+
+
+void LoopingPlayer::setTrack(const QString &s, bool loop) {
+    if (s.isEmpty()) {
+        mediaplayer->pause();
+        playlist->clear();
         return;
     }
-    mediaObject->pause();
+
+    bool i = this->isPlaying() || this->playingClicked;
+    playlist->clear();
+    playlist->addMedia(QUrl::fromLocalFile(s));
+    playlist->setCurrentIndex(0);
+
+    if (loop)
+        playlist->setPlaybackMode(QMediaPlaylist::Loop);
+    else
+        playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+
+    if (i)
+        this->play();
 }
 
 
-void LoopingPlayer::aboutToFinish_cb()
+void LoopingPlayer::setVolume(int n)
 {
-    this->enqueue();
-}
-
-
-void LoopingPlayer::setInternalTrack(const Phonon::MediaSource &cms) {
-    this->currentSource = cms;
-}
-
-
-void LoopingPlayer::setCurrentTrack(const Phonon::MediaSource &cms) {
-    this->currentSource = cms;
-    mediaObject->setCurrentSource(this->currentSource);
-}
-
-
-void LoopingPlayer::setVolume(float n)
-{
-    if (!this->testSetAudioChain()) {
-        return;
-    }
-    audioOutput->setVolume(n);
+    mediaplayer->setVolume(n);
 }
 
 
 void LoopingPlayer::togglePlaying()
 {
-    if (this->isPlaying()) {
+    if (this->isPlaying())
         this->pause();
-    }
-    this->play();
+    else
+        this->play();
 }
 
 
-void LoopingPlayer::togglePlaying(const Phonon::MediaSource &cms)
+bool LoopingPlayer::isAvailable()
 {
-    this->setCurrentTrack(cms);
-    this->togglePlaying();
-}
-
-
-LoopingPlayer::~LoopingPlayer()
-{
-    if (audioConnected) {
-        delete audioOutput;
-        delete mediaObject;
-    }
+    return mediaplayer && mediaplayer->isAvailable();
 }
 
 
 bool LoopingPlayer::isPlaying()
 {
-    return audioConnected && mediaObject->state() == Phonon::PlayingState;
+    return this->playingClicked || mediaplayer->state() == QMediaPlayer::PlayingState;
 }
 
 
 bool LoopingPlayer::isPaused()
 {
-    return audioConnected && mediaObject->state() == Phonon::PausedState;
+    return mediaplayer->state() == QMediaPlayer::PausedState;
 }
 
 
 bool LoopingPlayer::isStopped()
 {
-    return audioConnected && mediaObject->state() == Phonon::StoppedState;
+    return mediaplayer->state() == QMediaPlayer::StoppedState;
 }
 
 
 bool LoopingPlayer::isLoadingOrBuffering()
 {
-    return audioConnected && (mediaObject->state() == Phonon::LoadingState || mediaObject->state() == Phonon::BufferingState);
+    return mediaplayer->mediaStatus() == QMediaPlayer::BufferingMedia || 
+            mediaplayer->mediaStatus() == QMediaPlayer::LoadingMedia;
 }
 
 
 bool LoopingPlayer::isFaulty()
 {
-    return audioConnected && mediaObject->state() == Phonon::ErrorState;
+    return mediaplayer->mediaStatus() == QMediaPlayer::UnknownMediaStatus || 
+            mediaplayer->mediaStatus() == QMediaPlayer::InvalidMedia;
+}
+
+
+LoopingPlayer::~LoopingPlayer()
+{
 }

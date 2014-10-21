@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QWidget>
-#include <QtGui>
+#include <QtWidgets>
 #include <QSlider>
 #include <QMenu>
 #include <QMenuBar>
@@ -73,7 +73,8 @@ private:
 
     bool setPlaylistFile(const QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
     bool setSonglistFile(const QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
-    bool setSongDirectory(const QString &s, const bool criticalWarning = false, const QString &buttonText = "O");
+    bool setSongDirectory(const QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
+    void updateLabels();
 
 private slots:
     void init();

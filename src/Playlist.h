@@ -7,18 +7,14 @@
 #include <QPair>
 
 
-class PlaylistStatus {
-public:
-    enum StatusEnum {
-        OK, 
-        Uninitialized, 
-        EmptyFile, 
-        EmptySongDirectory, 
-        PartialSongDirectory,
-        ParseFailure
-    };
-private:
-    PlaylistStatus();
+
+enum class PlaylistStatus {
+    OK, 
+    Uninitialized, 
+    EmptyFile, 
+    EmptySongDirectory, 
+    PartialSongDirectory,
+    ParseFailure
 };
 
 
@@ -32,26 +28,28 @@ public:
                       const QString &songMapSeparator = ":");
     ~Playlist();
     void init();
-    PlaylistStatus::StatusEnum createPlaylistFromFile(QTextStream &in);
-    PlaylistStatus::StatusEnum createSongMapFromFile(QTextStream &in);
-    PlaylistStatus::StatusEnum setSongDirectory(const QString &s);
-    PlaylistStatus::StatusEnum checkSongDirectory();
+    PlaylistStatus createPlaylistFromFile(QTextStream &in);
+    PlaylistStatus createSongMapFromFile(QTextStream &in);
+    PlaylistStatus setSongDirectory(const QString &s);
+    PlaylistStatus checkSongDirectory();
 
-    PlaylistStatus::StatusEnum status();
-    PlaylistStatus::StatusEnum nextChapter();
-    PlaylistStatus::StatusEnum prevChapter();
-    PlaylistStatus::StatusEnum nextSong(bool turnAround = true);
-    PlaylistStatus::StatusEnum prevSong(bool turnAround = true);
-    PlaylistStatus::StatusEnum reset();
+    PlaylistStatus status();
+    PlaylistStatus nextChapter();
+    PlaylistStatus prevChapter();
+    PlaylistStatus nextSong(bool turnAround = true);
+    PlaylistStatus prevSong(bool turnAround = true);
+    PlaylistStatus reset();
     QString getCurrentChapter();
     QString getCurrentSong();
     QString getCurrentSongName();
+    QString getCurrentSongPath();
     QString getLastParseError();
     QString getTitle();
+    bool loopCurrentSong();
     void printPlaylist();
 
 private:
-    inline QString getSongPath(const QString &s);
+    QString getSongPath(const QString &s);
 
     const QString playListSeparator;
     const QString playListSongSeparator;
@@ -68,7 +66,7 @@ private:
     QString title;
 
     QString lastParseError;
-    PlaylistStatus::StatusEnum lastStatus;
+    PlaylistStatus lastStatus;
 
 };
 

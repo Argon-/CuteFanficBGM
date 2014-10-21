@@ -2,6 +2,7 @@
 #include <QTextStream>
 #include <QFileInfo>
 #include <QFile>
+#include <QFileInfo>
 #include <QDir>
 #include <QDebug>
 
@@ -21,7 +22,7 @@ Playlist::Playlist(const QString &playListSeparator,
 }
 
 
-PlaylistStatus::StatusEnum Playlist::nextChapter() 
+PlaylistStatus Playlist::nextChapter() 
 {
     if (this->playList.isEmpty()) {
         this->lastStatus = PlaylistStatus::Uninitialized;
@@ -40,7 +41,7 @@ PlaylistStatus::StatusEnum Playlist::nextChapter()
 }
 
 
-PlaylistStatus::StatusEnum Playlist::prevChapter() 
+PlaylistStatus Playlist::prevChapter() 
 {
     if (this->playList.isEmpty()) {
         this->lastStatus = PlaylistStatus::Uninitialized;
@@ -59,7 +60,7 @@ PlaylistStatus::StatusEnum Playlist::prevChapter()
 }
 
 
-PlaylistStatus::StatusEnum Playlist::nextSong(bool turnAround)
+PlaylistStatus Playlist::nextSong(bool turnAround)
  {
     if (this->currentChapter->second.isEmpty()) {
         this->lastStatus = PlaylistStatus::Uninitialized;
@@ -80,7 +81,7 @@ PlaylistStatus::StatusEnum Playlist::nextSong(bool turnAround)
 }
 
 
-PlaylistStatus::StatusEnum Playlist::prevSong(bool turnAround) 
+PlaylistStatus Playlist::prevSong(bool turnAround) 
 {
     if (this->currentChapter->second.isEmpty()) {
         this->lastStatus = PlaylistStatus::Uninitialized;
@@ -101,7 +102,7 @@ PlaylistStatus::StatusEnum Playlist::prevSong(bool turnAround)
 }
 
 
-PlaylistStatus::StatusEnum Playlist::reset() 
+PlaylistStatus Playlist::reset() 
 {
     if (this->playList.isEmpty()) {
         this->lastStatus = PlaylistStatus::Uninitialized;
@@ -142,21 +143,23 @@ QString Playlist::getCurrentChapter()
 QString Playlist::getCurrentSong() 
 {
     this->lastStatus = PlaylistStatus::OK;
-    return QString::number(*this->currentSong);
+    return *this->currentSong != 0 ? QString::number(abs(*this->currentSong)) : "---";
 }
 
 
 QString Playlist::getCurrentSongName() 
 {
     this->lastStatus = PlaylistStatus::OK;
-    QString s = this->songMap.value(*currentSong, "");
+    if (*this->currentSong == 0)
+        return "";
+    QString s = this->songMap.value(abs(*this->currentSong), "");
     // probably better to use QFileInfo::basename but it uses QFile internally 
     // for this simple task
     return s.left(s.lastIndexOf("."));
 }
 
 
-PlaylistStatus::StatusEnum Playlist::createPlaylistFromFile(QTextStream &in)
+PlaylistStatus Playlist::createPlaylistFromFile(QTextStream &in)
 {
     // empty file?
     if (in.atEnd()) {
@@ -226,7 +229,7 @@ PlaylistStatus::StatusEnum Playlist::createPlaylistFromFile(QTextStream &in)
 }
 
 
-PlaylistStatus::StatusEnum Playlist::createSongMapFromFile(QTextStream &in)
+PlaylistStatus Playlist::createSongMapFromFile(QTextStream &in)
 {
     // empty file?
     if (in.atEnd()) {
@@ -286,7 +289,7 @@ PlaylistStatus::StatusEnum Playlist::createSongMapFromFile(QTextStream &in)
 }
 
 
-PlaylistStatus::StatusEnum Playlist::setSongDirectory(const QString &s)
+PlaylistStatus Playlist::setSongDirectory(const QString &s)
 {
     if (!s.isNull() && !s.isEmpty()) {
         this->songDirectory = s;
@@ -299,7 +302,7 @@ PlaylistStatus::StatusEnum Playlist::setSongDirectory(const QString &s)
 }
 
 
-PlaylistStatus::StatusEnum Playlist::checkSongDirectory()
+PlaylistStatus Playlist::checkSongDirectory()
 {
     int e = 0;
     QHash<int, QString>::const_iterator i = this->songMap.constBegin();
@@ -321,10 +324,25 @@ PlaylistStatus::StatusEnum Playlist::checkSongDirectory()
 }
 
 
-inline QString Playlist::getSongPath(const QString &s)
+QString Playlist::getSongPath(const QString &s)
 {
     this->lastStatus = PlaylistStatus::OK;
     return this->songDirectory + QDir::separator() + s;
+}
+
+
+QString Playlist::getCurrentSongPath()
+{
+    this->lastStatus = PlaylistStatus::OK;
+    if (*currentSong == 0)
+        return "";
+    return QFileInfo(this->songDirectory + QDir::separator() + songMap.value(abs(*currentSong))).absoluteFilePath();
+}
+
+
+bool Playlist::loopCurrentSong()
+{
+    return *currentSong > 0;
 }
 
 
@@ -335,7 +353,7 @@ QString Playlist::getTitle()
 }
 
 
-PlaylistStatus::StatusEnum Playlist::status()
+PlaylistStatus Playlist::status()
 {
     this->lastStatus = PlaylistStatus::OK;
     return this->lastStatus;

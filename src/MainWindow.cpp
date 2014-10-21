@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include <QTextStream>
 #include <QDebug>
 
 
@@ -112,18 +113,18 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     menu_settings->addSeparator();
     menu_settings->addAction(act_always_on_top);
 
-    act_playpause->setShortcut(QKeySequence(tr("Ctrl+P")));
-    act_proceed->setShortcut(QKeySequence(tr("P")));
-    act_reset->setShortcut(QKeySequence(tr("R")));
+    act_playpause->setShortcut(QKeySequence(tr("Ctrl+A")));
+    act_proceed->setShortcut(QKeySequence(tr("Ctrl+S")));
+    act_reset->setShortcut(QKeySequence(tr("Ctrl+D")));
     act_ch_next->setShortcut(QKeySequence(tr("Ctrl++")));
     act_ch_prev->setShortcut(QKeySequence(tr("Ctrl+-")));
-    act_song_next->setShortcut(QKeySequence(tr("Shift++")));
-    act_song_prev->setShortcut(QKeySequence(tr("Shift+-")));
+    //act_song_next->setShortcut(QKeySequence(tr("Shift++")));
+    //act_song_prev->setShortcut(QKeySequence(tr("Shift+-")));
 
-    act_selectPlaylist->setShortcut(QKeySequence(tr("Shift+P")));
-    act_selectSonglist->setShortcut(QKeySequence(tr("Shift+S")));
-    act_selectSongDirectoy->setShortcut(QKeySequence(tr("Shift+D")));
-    act_always_on_top->setShortcut(QKeySequence(tr("Shift+A")));
+    //act_selectPlaylist->setShortcut(QKeySequence(tr("Shift+L")));
+    //act_selectSonglist->setShortcut(QKeySequence(tr("Shift+S")));
+    //act_selectSongDirectoy->setShortcut(QKeySequence(tr("Shift+D")));
+    //act_always_on_top->setShortcut(QKeySequence(tr("Shift+A")));
 
     // connect slots
     connect(btn_playpause, SIGNAL(clicked()), this, SLOT(playpause_cb()));
@@ -166,7 +167,7 @@ void MainWindow::init() {
         return;
     }
     settings->setValue("location/songs", path);
-    qDebug() << "song dir: " << path;
+    QTextStream(stdout) << "song dir: " << path << endl;
 
     
     // retrieve songlist
@@ -179,7 +180,7 @@ void MainWindow::init() {
         return;
     }
     settings->setValue("location/songlist", path);
-    qDebug() << "songlist: " << path;
+    QTextStream(stdout) << "songlist: " << path << endl;
 
 
     // check if every song actually exists
@@ -202,8 +203,9 @@ void MainWindow::init() {
         return;
     }
     settings->setValue("location/playlist", path);
-    qDebug() << "playlist: " << path;
+    QTextStream(stdout) << "playlist: " << path << endl;
 
+    this->updateLabels();
 
 
 
@@ -214,16 +216,9 @@ void MainWindow::init() {
 
 
 
-    player->testSetAudioChain();
-    player->setCurrentTrack(QString("resources/test2.mp3"));
-    // load settings, e.g. last pos and start playback, volume, file locations
-    //this->playpause_cb();
+
     btn_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
     act_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
-    this->l_title->setText(playlist->getTitle());
-    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
-    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
-    this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
 
@@ -239,7 +234,7 @@ void MainWindow::playpause_cb()
     else {
         btn_playpause->setText(tr("Pause"));
         act_playpause->setText(tr("Pause"));
-        player->setVolume((float) slider_volume->value() / max_volume);
+        player->setVolume(slider_volume->value());
         player->play();
     }
 }
@@ -249,9 +244,7 @@ void MainWindow::proceed_cb()
 {
     qDebug() << "proceed_cb";
     playlist->nextSong(false);
-    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
-    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
-    this->l_song_title->setText(playlist->getCurrentSongName());
+    this->updateLabels();
 }
 
 
@@ -259,9 +252,7 @@ void MainWindow::reset_cb()
 {
     qDebug() << "reset_cb";
     playlist->reset();
-    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
-    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
-    this->l_song_title->setText(playlist->getCurrentSongName());
+    this->updateLabels();
 }
 
 
@@ -269,9 +260,7 @@ void MainWindow::ch_prev_cb()
 {
     qDebug() << "ch_prev_cb";
     playlist->prevChapter();
-    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
-    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
-    this->l_song_title->setText(playlist->getCurrentSongName());
+    this->updateLabels();
 }
 
 
@@ -279,9 +268,7 @@ void MainWindow::ch_next_cb()
 {
     qDebug() << "ch_next_cb";
     playlist->nextChapter();
-    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
-    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
-    this->l_song_title->setText(playlist->getCurrentSongName());
+    this->updateLabels();
 }
 
 
@@ -289,9 +276,7 @@ void MainWindow::song_prev_cb()
 {
     qDebug() << "song_prev_cb";
     playlist->prevSong();
-    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
-    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
-    this->l_song_title->setText(playlist->getCurrentSongName());
+    this->updateLabels();
 }
 
 
@@ -299,16 +284,24 @@ void MainWindow::song_next_cb()
 {
     qDebug() << "song_next_cb";
     playlist->nextSong();
-    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
-    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
-    this->l_song_title->setText(playlist->getCurrentSongName());
+    this->updateLabels();
 }
 
 
 void MainWindow::slider_volume_cb(int value)
 {
     qDebug() << "slider_volume_cb: " << value;
-    player->setVolume((float) value/max_volume);
+    player->setVolume(value);
+}
+
+
+void MainWindow::updateLabels()
+{
+    player->setTrack(playlist->getCurrentSongPath(), playlist->loopCurrentSong());
+    this->l_title->setText(playlist->getTitle());
+    this->l_ch_ctrl->setText(playlist->getCurrentChapter());
+    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
 
@@ -321,6 +314,7 @@ void MainWindow::selectAndSetSonglistFile_cb()
 
     QTextStream(stdout) << "New SonglistFile: " << s << endl;
     settings->setValue("location/songlist", s);
+    this->updateLabels();
 }
 
 
@@ -342,7 +336,7 @@ bool MainWindow::setSonglistFile(const QString &s, const bool criticalWarning, c
     }
 
     QTextStream in(&f);
-    PlaylistStatus::StatusEnum r = playlist->createSongMapFromFile(in);
+    PlaylistStatus r = playlist->createSongMapFromFile(in);
     if (r != PlaylistStatus::OK) {
         if (r == PlaylistStatus::ParseFailure) {
             this->displayError(tr("Invalid file."), 
@@ -369,6 +363,7 @@ void MainWindow::selectAndSetPlaylistFile_cb()
 
     QTextStream(stdout) << "New PlaylistFile: " << s << endl;
     settings->setValue("location/playlist", s);
+    this->updateLabels();
 }
 
 
@@ -390,7 +385,7 @@ bool MainWindow::setPlaylistFile(const QString &s, const bool criticalWarning, c
     }
 
     QTextStream in(&f);
-    PlaylistStatus::StatusEnum r = playlist->createPlaylistFromFile(in);
+    PlaylistStatus r = playlist->createPlaylistFromFile(in);
     if (r != PlaylistStatus::OK) {
         if (r == PlaylistStatus::ParseFailure) {
             this->displayError(tr("Invalid file."), 
@@ -419,6 +414,7 @@ void MainWindow::selectAndSetSongDirectory_cb()
 
     QTextStream(stdout) << "New SongDirectory: " << s << endl;
     settings->setValue("location/songs", s);
+    this->updateLabels();
 }
 
 
