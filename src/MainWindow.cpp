@@ -180,7 +180,8 @@ void MainWindow::init() {
         return;
     }
     settings->setValue("location/songlist", path);
-    QTextStream(stdout) << "songlist: " << path << endl;
+    settings->setValue("location/songlist_checksum", playlist->getSongMapChecksum());
+    QTextStream(stdout) << "songlist: " << path << " (" << playlist->getSongMapChecksum() << ")" << endl;
 
 
     // check if every song actually exists
@@ -204,7 +205,8 @@ void MainWindow::init() {
         return;
     }
     settings->setValue("location/playlist", path);
-    QTextStream(stdout) << "playlist: " << path << endl;
+    settings->setValue("location/playlist_checksum", playlist->getPlaylistChecksum());
+    QTextStream(stdout) << "playlist: " << path  << " (" << playlist->getPlaylistChecksum() << ")" << endl;
 
     this->updateLabels();
 

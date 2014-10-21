@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
+#include <QCryptographicHash>
 #include <QDebug>
 
 
@@ -169,11 +170,15 @@ PlaylistStatus Playlist::createPlaylistFromFile(QTextStream &in)
     this->title = in.readLine();
 
     QList<QPair<QString, QList<int> > > newList;
+    QCryptographicHash checksum(QCryptographicHash::Md5);
 
     while (!in.atEnd()) {
         QString line = in.readLine();
         if (line.isEmpty())
             continue;
+
+        QByteArray a = line.toLocal8Bit();
+        checksum.addData(a.data(), a.size());
 
         // is there even a separator?
         // not really required, main purpose is to give better error messages
@@ -221,6 +226,7 @@ PlaylistStatus Playlist::createPlaylistFromFile(QTextStream &in)
         newList.append(QPair<QString, QList<int> >(chapter, songs));
     }
 
+    this->playlistChecksum = checksum.result().toHex();
     this->playList = newList;
     this->currentChapter = this->playList.constBegin();
     this->currentSong = currentChapter->second.constBegin();
@@ -238,11 +244,15 @@ PlaylistStatus Playlist::createSongMapFromFile(QTextStream &in)
     }
 
     QHash<int, QString> newMap;
+    QCryptographicHash checksum(QCryptographicHash::Md5);
 
     while (!in.atEnd()) {
         QString line = in.readLine();
         if (line.isEmpty())
             continue;
+
+        QByteArray a = line.toLocal8Bit();
+        checksum.addData(a.data(), a.size());
 
         // is there even a separator?
         if (!line.contains(songMapSeparator)) {
@@ -283,6 +293,7 @@ PlaylistStatus Playlist::createSongMapFromFile(QTextStream &in)
         newMap.insert(key, split.join(songMapSeparator));
     }
 
+    this->songMapChecksum = checksum.result().toHex();
     this->songMap = newMap;
     this->lastStatus = PlaylistStatus::OK;
     return this->lastStatus;
@@ -364,6 +375,18 @@ QString Playlist::getLastParseError()
 {
     this->lastStatus = PlaylistStatus::OK;
     return this->lastParseError;
+}
+
+
+QString Playlist::getPlaylistChecksum()
+{
+    return this->playlistChecksum;
+}
+
+
+QString Playlist::getSongMapChecksum()
+{
+    return this->songMapChecksum;
 }
 
 

@@ -45,6 +45,8 @@ public:
     QString getCurrentSongPath();
     QString getLastParseError();
     QString getTitle();
+    QString getPlaylistChecksum();
+    QString getSongMapChecksum();
     bool loopCurrentSong();
     void printPlaylist();
 
@@ -67,6 +69,9 @@ private:
 
     QString lastParseError;
     PlaylistStatus lastStatus;
+
+    QString playlistChecksum;
+    QString songMapChecksum;
 
 };
 
