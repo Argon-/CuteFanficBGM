@@ -3,7 +3,9 @@
 #include <QDebug>
 
 
-MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *player) : 
+MainWindow::MainWindow(QWidget *parent, 
+                       Playlist *playlist, 
+                       LoopingPlayer *player) : 
     QMainWindow(parent),
     max_volume(100),
     alwaysOnTop(false),
@@ -19,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     l_ch_ctrl(new QLabel(tr("chapter"), this)),
     l_song_ctrl(new QLabel(tr("song"), this)),
     l_song_title(new QLabel(tr(""), this)),
-    btn_playpause(new QPushButton(tr("Play"), this)),
+    btn_playpause(new QPushButton(tr("Pause"), this)),
     btn_proceed(new QPushButton(tr("&Proceed"), this)),
     btn_reset(new QPushButton(tr("Reset"), this)),
     btn_ch_prev(new QPushButton(" - ", this)),
@@ -28,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
     btn_song_next(new QPushButton(tr(" + "), this)),
     slider_volume(new QSlider(Qt::Horizontal, this)),
     menu_controls(new QMenu(tr("Controls"), this)),
-    act_playpause(new QAction(tr("Play"), this)),
+    act_playpause(new QAction(tr("Pause"), this)),
     act_proceed(new QAction(tr("Proceed"), this)),
     act_reset(new QAction(tr("Reset"), this)),
     act_ch_next(new QAction(tr("Next chapter"), this)),
@@ -155,71 +157,128 @@ MainWindow::MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *playe
 
 
 void MainWindow::init() {
-    QString path;
 
     // retrieve song dir
-    path = settings->value("location/songs", "/").toString();
-    if (!QFile::exists(path)) {
-        path = QFileDialog::getExistingDirectory(this, tr("Please select a song directory"), QDir::homePath(), QFileDialog::ShowDirsOnly);
+    QString spath = settings->value("location/songs", "/").toString();
+    if (!QFile::exists(spath)) {
+        spath = QFileDialog::getExistingDirectory(this, 
+                        tr("Please select a song directory"), 
+                        /*QDir::homePath()*/ "", QFileDialog::ShowDirsOnly);
     }
-    if (!this->setSongDirectory(path, true, tr("Quit"))) {
+    if (!this->setSongDirectory(spath, true, tr("Quit"))) {
         this->close();
         return;
     }
-    settings->setValue("location/songs", path);
-    QTextStream(stdout) << "song dir: " << path << endl;
-
+    settings->setValue("location/songs", spath);
+    QTextStream(stdout) << "song dir: " << spath << endl;
     
     // retrieve songlist
-    path = settings->value("location/songlist", "Songlist.txt").toString();
-    if (!QFile::exists(path)) {
-        path = this->promptForFile(tr("Please select a songlist"));
+    QString slpath = settings->value("location/songlist", "Songlist.txt").toString();
+    if (!QFile::exists(slpath)) {
+        slpath = this->promptForFile(tr("Please select a songlist"));
     }
-    if (!this->setSonglistFile(path, true, tr("Quit"))) {
+    if (!this->setSonglistFile(slpath, true, tr("Quit"))) {
         this->close();
         return;
     }
-    settings->setValue("location/songlist", path);
-    settings->setValue("location/songlist_checksum", playlist->getSongMapChecksum());
-    QTextStream(stdout) << "songlist: " << path << " (" << playlist->getSongMapChecksum() << ")" << endl;
-
+    settings->setValue("location/songlist", slpath);
+    QTextStream(stdout) << "songlist: " << slpath << " (" 
+                        << playlist->getSongMapChecksum() << ")" << endl;
 
     // check if every song actually exists
     if (playlist->checkSongDirectory() != PlaylistStatus::OK) {
         this->displayError(tr("File(s) not found."), 
                            tr("One or more songs were not found. See log for details. \
-                              Try a different song directory or validate our songlist."), 
+                              Please try a different song directory or validate our songlist."), 
                            true, tr("Quit"));
         this->close();
         return;
     }
 
-
     // retrieve playlist
-    path = settings->value("location/playlist", "Sisterhood.txt").toString();
-    if (!QFile::exists(path)) {
-        path = this->promptForFile(tr("Please select a playlist"));
+    QString ppath = settings->value("location/playlist", "Sisterhood.txt").toString();
+    if (!QFile::exists(ppath)) {
+        ppath = this->promptForFile(tr("Please select a playlist"));
     }
-    if (!this->setPlaylistFile(path, true, tr("Quit"))) {
+    if (!this->setPlaylistFile(ppath, true, tr("Quit"))) {
         this->close();
         return;
     }
-    settings->setValue("location/playlist", path);
-    settings->setValue("location/playlist_checksum", playlist->getPlaylistChecksum());
-    QTextStream(stdout) << "playlist: " << path  << " (" << playlist->getPlaylistChecksum() << ")" << endl;
+    settings->setValue("location/playlist", ppath);
+    QTextStream(stdout) << "playlist: " << ppath  << " (" 
+                        << playlist->getPlaylistChecksum() << ")" << endl;
 
+
+    // load and apply settings
+
+    // always on top
+    this->alwaysOnTop = settings->value("state/window/always_on_top", 
+                                        false).toBool();
+    if (this->alwaysOnTop) {
+        this->setWindowFlags(this->windowFlags() | 
+                             Qt::CustomizeWindowHint | 
+                             Qt::WindowStaysOnTopHint);
+        this->show();
+    }
+
+    // playback volume
+    int vol = settings->value("state/player/volume", 50).toInt();
+    slider_volume->setValue(vol);
+    player->setVolume(vol);
+
+    // current chapter
+    bool loadedListDoesNotMatchChecksum = false;
+    QString pcs = settings->value("location/playlist_checksum", "").toString();
+    qDebug() << "Reading playlist checksum:" << pcs;
+    if (!pcs.isEmpty() && pcs == playlist->getPlaylistChecksum())
+    {
+        qDebug() << "   pcs matches!";
+        bool ok;
+        int n = settings->value("state/playlist/current_chapter_num", "").toInt(&ok);
+        PlaylistStatus s1 = playlist->setCurrentChapterByNumber(n);
+
+        // current song
+        QString scs = settings->value("location/songlist_checksum", "").toString();
+        qDebug() << "   Reading songlist checksum:" << scs;
+        if (ok && s1 == PlaylistStatus::OK && !scs.isEmpty() && scs == playlist->getSongMapChecksum())
+        {
+            qDebug() << "      scs matches!";
+            bool ok;
+            int m = settings->value("state/playlist/current_song_num", "").toInt(&ok);
+            PlaylistStatus s2 = playlist->setCurrentSongByNumber(m);
+
+            // playback state
+            if (ok && s2 == PlaylistStatus::OK && settings->value("state/player/playing", false).toBool()) {
+                qDebug() << "      resuming playback from last position";
+                player->play();
+            }
+            else {
+                loadedListDoesNotMatchChecksum = true;
+                qDebug() << "      scs has problems";
+            }
+        }
+        else {
+            loadedListDoesNotMatchChecksum = true;
+            qDebug() << "   scs does not match: " << scs << " != " << playlist->getSongMapChecksum();
+        }
+    }
+    else {
+        loadedListDoesNotMatchChecksum = true;
+        qDebug() << "pcs does not match: " << pcs << " != " << playlist->getPlaylistChecksum();
+    }
+
+    // when loaded lists (i.e., old path was still fine) have changed content,
+    // the checksums won't match (as expected) so we need new "base values"
+    if (loadedListDoesNotMatchChecksum) {
+        QTextStream(stdout) << "playlist/songlist changed, setting new base values" << endl;
+        settings->setValue("location/playlist_checksum", playlist->getPlaylistChecksum());
+        settings->setValue("location/songlist_checksum", playlist->getSongMapChecksum());
+        settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
+        settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
+        settings->setValue("state/player/playing", false);
+    }
+    
     this->updateLabels();
-
-
-
-
-
-    // load settings, e.g. last pos and start playback, volume, file locations
-
-
-
-
-
     btn_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
     act_playpause->setText(player->isPlaying() ? tr("Pause") : tr("Play"));
 }
@@ -240,6 +299,7 @@ void MainWindow::playpause_cb()
         player->setVolume(slider_volume->value());
         player->play();
     }
+    settings->setValue("state/player/playing", player->isPlaying());
 }
 
 
@@ -247,6 +307,8 @@ void MainWindow::proceed_cb()
 {
     qDebug() << "proceed_cb";
     playlist->nextSong(false);
+    settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
+    settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
     this->updateLabels();
 }
 
@@ -255,7 +317,15 @@ void MainWindow::reset_cb()
 {
     qDebug() << "reset_cb";
     playlist->reset();
+    settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
+    settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
     this->updateLabels();
+    if (player->isPlaying()) {
+        btn_playpause->setText(tr("Play"));
+        act_playpause->setText(tr("Play"));
+        player->pause();
+    }
+    settings->setValue("state/player/playing", false);
 }
 
 
@@ -263,6 +333,8 @@ void MainWindow::ch_prev_cb()
 {
     qDebug() << "ch_prev_cb";
     playlist->prevChapter();
+    settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
+    settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
     this->updateLabels();
 }
 
@@ -271,6 +343,8 @@ void MainWindow::ch_next_cb()
 {
     qDebug() << "ch_next_cb";
     playlist->nextChapter();
+    settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
+    settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
     this->updateLabels();
 }
 
@@ -279,6 +353,8 @@ void MainWindow::song_prev_cb()
 {
     qDebug() << "song_prev_cb";
     playlist->prevSong();
+    settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
+    settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
     this->updateLabels();
 }
 
@@ -287,6 +363,8 @@ void MainWindow::song_next_cb()
 {
     qDebug() << "song_next_cb";
     playlist->nextSong();
+    settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
+    settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
     this->updateLabels();
 }
 
@@ -295,6 +373,7 @@ void MainWindow::slider_volume_cb(int value)
 {
     qDebug() << "slider_volume_cb: " << value;
     player->setVolume(value);
+    settings->setValue("state/player/volume", value);
 }
 
 
@@ -317,11 +396,14 @@ void MainWindow::selectAndSetSonglistFile_cb()
 
     QTextStream(stdout) << "New SonglistFile: " << s << endl;
     settings->setValue("location/songlist", s);
+    settings->setValue("location/songlist_checksum", playlist->getSongMapChecksum());
     this->updateLabels();
 }
 
 
-bool MainWindow::setSonglistFile(const QString &s, const bool criticalWarning, const QString &buttonText)
+bool MainWindow::setSonglistFile(const QString &s, 
+                                 const bool criticalWarning, 
+                                 const QString &buttonText)
 {
     if (!QFile::exists(s)) {
         this->displayError(tr("File not found."), 
@@ -348,7 +430,8 @@ bool MainWindow::setSonglistFile(const QString &s, const bool criticalWarning, c
         }
         else {
             this->displayError(tr("Invalid file."), 
-                               tr("Content of file \"") + s + tr("\" is not correctly formatted."), 
+                               tr("Content of file \"") + s + 
+                               tr("\" is not correctly formatted."), 
                                criticalWarning, buttonText);
         }
         return false;
@@ -366,11 +449,14 @@ void MainWindow::selectAndSetPlaylistFile_cb()
 
     QTextStream(stdout) << "New PlaylistFile: " << s << endl;
     settings->setValue("location/playlist", s);
+    settings->setValue("location/playlist_checksum", playlist->getPlaylistChecksum());
     this->updateLabels();
 }
 
 
-bool MainWindow::setPlaylistFile(const QString &s, const bool criticalWarning, const QString &buttonText)
+bool MainWindow::setPlaylistFile(const QString &s, 
+                                 const bool criticalWarning, 
+                                 const QString &buttonText)
 {
     if (!QFile::exists(s)) {
         this->displayError(tr("File not found."), 
@@ -397,7 +483,8 @@ bool MainWindow::setPlaylistFile(const QString &s, const bool criticalWarning, c
         }
         else {
             this->displayError(tr("Invalid file."), 
-                               tr("Content of file \"") + s + tr("\" is not correctly formatted."), 
+                               tr("Content of file \"") + s + 
+                               tr("\" is not correctly formatted."), 
                                criticalWarning, buttonText);
         }
         return false;
@@ -410,7 +497,7 @@ void MainWindow::selectAndSetSongDirectory_cb()
 {
     QString s = QFileDialog::getExistingDirectory(this, 
                     tr("Select song directory"), 
-                    QDir::homePath(), QFileDialog::ShowDirsOnly);
+                    /*QDir::homePath()*/ "", QFileDialog::ShowDirsOnly);
     if (!this->setSongDirectory(s)) {
         return;
     }
@@ -421,7 +508,9 @@ void MainWindow::selectAndSetSongDirectory_cb()
 }
 
 
-bool MainWindow::setSongDirectory(const QString &s, const bool criticalWarning, const QString &buttonText)
+bool MainWindow::setSongDirectory(const QString &s, 
+                                  const bool criticalWarning, 
+                                  const QString &buttonText)
 {
     if (s.isNull() || s.isEmpty() || !QDir(s).exists()) {
         this->displayError(tr("Invalid directory."), 
@@ -440,7 +529,10 @@ bool MainWindow::setSongDirectory(const QString &s, const bool criticalWarning, 
 }
 
 
-void MainWindow::displayError(const QString &errorText, const QString &informativeText, const bool criticalWarning, const QString &buttonText)
+void MainWindow::displayError(const QString &errorText, 
+                              const QString &informativeText, 
+                              const bool criticalWarning, 
+                              const QString &buttonText)
 {
     QTextStream(stderr) << errorText << " => " << informativeText << endl;
     QMessageBox msg;
@@ -456,21 +548,26 @@ QString MainWindow::promptForFile(const QString &prompt)
 {
     return QFileDialog::getOpenFileName(0, 
             prompt,
-            //"Please select a songlist (" + s + ")", 
-            //QDir::homePath()
-            "");
+            /*QDir::homePath()*/ "");
 }
 
 
 void MainWindow::toggleAlwaysOnTop()
 {
     this->alwaysOnTop = !this->alwaysOnTop;
-    if (alwaysOnTop) {
-        this->setWindowFlags(this->windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
+    settings->setValue("state/window/always_on_top", this->alwaysOnTop);
+    if (this->alwaysOnTop) {
+        this->setWindowFlags(this->windowFlags() | 
+                             Qt::CustomizeWindowHint | 
+                             Qt::WindowStaysOnTopHint);
         this->show();
     }
     else {
-        this->setWindowFlags(this->windowFlags() ^ (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint));
+        // assumption: this is never called without both flags set, otherwhise
+        // they are added and not removed
+        this->setWindowFlags(this->windowFlags() ^ 
+                             (Qt::CustomizeWindowHint | 
+                              Qt::WindowStaysOnTopHint));
         this->show();
     }
 }

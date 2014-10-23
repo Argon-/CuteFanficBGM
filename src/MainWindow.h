@@ -18,7 +18,9 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent, Playlist *playlist, LoopingPlayer *player);
+    explicit MainWindow(QWidget *parent, 
+                        Playlist *playlist, 
+                        LoopingPlayer *player);
     ~MainWindow();
 
 private:
@@ -68,12 +70,21 @@ private:
     Playlist *playlist;
     LoopingPlayer *player;
 
-    void displayError(const QString &errorText, const QString &informativeText, const bool criticalWarning = true, const QString &buttonText = "Quit");
+    void displayError(const QString &errorText, 
+                      const QString &informativeText, 
+                      const bool criticalWarning = true, 
+                      const QString &buttonText = "Quit");
     QString promptForFile(const QString &prompt);
 
-    bool setPlaylistFile(const QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
-    bool setSonglistFile(const QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
-    bool setSongDirectory(const QString &s, const bool criticalWarning = false, const QString &buttonText = "OK");
+    bool setPlaylistFile(const QString &s, 
+                         const bool criticalWarning = false, 
+                         const QString &buttonText = "OK");
+    bool setSonglistFile(const QString &s, 
+                         const bool criticalWarning = false, 
+                         const QString &buttonText = "OK");
+    bool setSongDirectory(const QString &s, 
+                          const bool criticalWarning = false, 
+                          const QString &buttonText = "OK");
     void updateLabels();
 
 private slots:

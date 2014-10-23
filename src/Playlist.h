@@ -14,7 +14,8 @@ enum class PlaylistStatus {
     EmptyFile, 
     EmptySongDirectory, 
     PartialSongDirectory,
-    ParseFailure
+    ParseFailure,
+    InvalidNumbersSet
 };
 
 
@@ -41,12 +42,17 @@ public:
     PlaylistStatus reset();
     QString getCurrentChapter();
     QString getCurrentSong();
+
     QString getCurrentSongName();
     QString getCurrentSongPath();
     QString getLastParseError();
     QString getTitle();
     QString getPlaylistChecksum();
     QString getSongMapChecksum();
+    int getCurrentChapterNumber();
+    int getCurrentSongNumber();
+    PlaylistStatus setCurrentChapterByNumber(const int i);
+    PlaylistStatus setCurrentSongByNumber(const int i);
     bool loopCurrentSong();
     void printPlaylist();
 

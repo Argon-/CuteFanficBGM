@@ -18,7 +18,8 @@ LoopingPlayer::LoopingPlayer() :
         service = mediaplayer->service();
         if (service != NULL) {
             qDebug() << "   Retrieved service";
-            gaplessCtrl = qobject_cast<QMediaGaplessPlaybackControl *>(service->requestControl("org.qt-project.qt.mediaplayercontrol/5.0"));
+            gaplessCtrl = qobject_cast<QMediaGaplessPlaybackControl *>(
+                service->requestControl("org.qt-project.qt.mediaplayercontrol/5.0"));
             if (gaplessCtrl != NULL) {
                 qDebug() << "      Retrieved QMediaGaplessPlaybackControl";
                 service->releaseControl(gaplessCtrl);

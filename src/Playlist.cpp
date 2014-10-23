@@ -5,7 +5,6 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QCryptographicHash>
-#include <QDebug>
 
 
 Playlist::Playlist(const QString &playListSeparator, 
@@ -129,7 +128,8 @@ void Playlist::printPlaylist()
         QTextStream(stdout) << "Currently at: " << i->first << endl;
         QList<int>::const_iterator e;
         for (e = i->second.constBegin(); e != i->second.constEnd(); ++e) {
-            QTextStream(stdout) << "   " << *e << " (" << this->songMap.value(*e, "???") << ")" << endl;
+            QTextStream(stdout) << "   " << *e << " (" 
+                                << this->songMap.value(*e, "???") << ")" << endl;
         }
     }
 }
@@ -184,7 +184,7 @@ PlaylistStatus Playlist::createPlaylistFromFile(QTextStream &in)
         // not really required, main purpose is to give better error messages
         if (!line.contains(playListSeparator)) {
             this->lastParseError = QObject::tr("no separator \"") + playListSeparator + 
-                                    QObject::tr("\" found in line: \"") + line + "\"";
+                                   QObject::tr("\" found in line: \"") + line + "\"";
             this->lastStatus = PlaylistStatus::ParseFailure;
             return this->lastStatus;
         }
@@ -193,13 +193,15 @@ PlaylistStatus Playlist::createPlaylistFromFile(QTextStream &in)
         if (playListTerminator == line.at(line.length() - 1))
             line.remove(line.length() - 1, 1);
         else
-            QTextStream(stdout) << "warning: line is not properly terminated: " << line << endl;
+            QTextStream(stdout) << "warning: line is not properly terminated: " 
+                                << line << endl;
 
         QStringList split = line.split(playListSeparator, QString::SkipEmptyParts);
 
         // an existing separator does not guarantee two splits (QString::SkipEmptyParts)
         if (split.size() < 2) {
-            this->lastParseError = QObject::tr("invalid syntax in line: \"") + line + "\"";
+            this->lastParseError = QObject::tr("invalid syntax in line: \"") + 
+                                   line + "\"";
             this->lastStatus = PlaylistStatus::ParseFailure;
             return this->lastStatus;
         }
@@ -208,7 +210,9 @@ PlaylistStatus Playlist::createPlaylistFromFile(QTextStream &in)
 
         // create list of song ids
         // this might actually be empty, that's fine
-        QStringList songIDList = split.join(playListSeparator).split(playListSongSeparator, QString::SkipEmptyParts);
+        QStringList songIDList = split.join(playListSeparator)
+                                      .split(playListSongSeparator, 
+                                             QString::SkipEmptyParts);
         QList<int> songs;
 
         QStringList::const_iterator i;
@@ -216,7 +220,9 @@ PlaylistStatus Playlist::createPlaylistFromFile(QTextStream &in)
             bool ok;
             int n = i->toInt(&ok);
             if (!ok) {
-                this->lastParseError = QObject::tr("song ID \"") + *i + QObject::tr("\" is not a valid number, in line: \"") + line + "\"";
+                this->lastParseError = QObject::tr("song ID \"") + *i + 
+                                       QObject::tr("\" is not a valid number, in line: \"") + 
+                                       line + "\"";
                 this->lastStatus = PlaylistStatus::ParseFailure;
                 return this->lastStatus;
             }
@@ -267,14 +273,16 @@ PlaylistStatus Playlist::createSongMapFromFile(QTextStream &in)
         // an existing separator does not guarantee two splits
         // well, it does with QString::KeepEmptyParts but that's subject to change
         if (split.size() < 2) {
-            this->lastParseError = QObject::tr("invalid syntax in line: \"") + line + "\"";
+            this->lastParseError = QObject::tr("invalid syntax in line: \"") + 
+                                   line + "\"";
             this->lastStatus = PlaylistStatus::ParseFailure;
             return this->lastStatus;
         }
 
         // we need this because we split with QString::KeepEmptyParts
         if (split.first().isEmpty()) {
-            this->lastParseError = QObject::tr("missing song ID in line: \"") + line + "\"";
+            this->lastParseError = QObject::tr("missing song ID in line: \"") + 
+                                   line + "\"";
             this->lastStatus = PlaylistStatus::ParseFailure;
             return this->lastStatus;
         }
@@ -284,7 +292,10 @@ PlaylistStatus Playlist::createSongMapFromFile(QTextStream &in)
         QString tmp = split.takeFirst();
         int key = tmp.toInt(&ok);
         if (!ok) {
-            this->lastParseError = QObject::tr("song ID \"") + tmp + QObject::tr("\" is not a valid number, in line: \"") + line + "\"";
+            this->lastParseError = QObject::tr("song ID \"") + 
+                                   tmp + 
+                                   QObject::tr("\" is not a valid number, in line: \"") + 
+                                   line + "\"";
             this->lastStatus = PlaylistStatus::ParseFailure;
             return this->lastStatus;
         }
@@ -319,7 +330,8 @@ PlaylistStatus Playlist::checkSongDirectory()
     QHash<int, QString>::const_iterator i = this->songMap.constBegin();
     while (i != songMap.constEnd()) {
         if (!QFileInfo(getSongPath(i.value())).isFile()) {
-            QTextStream(stderr) << "file does not exist: " << getSongPath(i.value()) << endl;
+            QTextStream(stderr) << "file does not exist: " 
+                                << getSongPath(i.value()) << endl;
             ++e;
         }
         ++i;
@@ -347,7 +359,9 @@ QString Playlist::getCurrentSongPath()
     this->lastStatus = PlaylistStatus::OK;
     if (*currentSong == 0)
         return "";
-    return QFileInfo(this->songDirectory + QDir::separator() + songMap.value(abs(*currentSong))).absoluteFilePath();
+    return QFileInfo(this->songDirectory + 
+                     QDir::separator() + 
+                     songMap.value(abs(*currentSong))).absoluteFilePath();
 }
 
 
@@ -387,6 +401,62 @@ QString Playlist::getPlaylistChecksum()
 QString Playlist::getSongMapChecksum()
 {
     return this->songMapChecksum;
+}
+
+
+int Playlist::getCurrentChapterNumber()
+{
+    return this->currentChapter - this->playList.constBegin();
+}
+
+
+int Playlist::getCurrentSongNumber()
+{
+    return this->currentSong - this->currentChapter->second.constBegin();
+}
+
+
+PlaylistStatus Playlist::setCurrentChapterByNumber(const int i)
+{
+    QList<QPair<QString, QList<int> > >::const_iterator e = this->currentChapter;
+    
+    if (i > -1 && i < this->playList.size()) {
+        this->currentChapter = this->playList.constBegin() + i;
+        this->lastStatus = PlaylistStatus::OK;
+    }
+    else {
+        this->lastStatus = PlaylistStatus::InvalidNumbersSet;
+    }
+
+    if (this->currentChapter == NULL) {
+        this->currentChapter = e;
+        this->lastStatus = PlaylistStatus::InvalidNumbersSet;
+    }
+    return this->lastStatus;
+}
+
+
+PlaylistStatus Playlist::setCurrentSongByNumber(const int i)
+{
+    qDebug() << "Playlist::setCurrentSongByNumber with" << i;
+    QList<int>::const_iterator e = this->currentSong;
+
+    if (i > -1 && i < this->currentChapter->second.size()) {
+        this->currentSong = this->currentChapter->second.constBegin() + i;
+        this->lastStatus = PlaylistStatus::OK;
+    }
+    else {
+        qDebug() << "   -> PlaylistStatus::InvalidNumbersSet";
+        this->lastStatus = PlaylistStatus::InvalidNumbersSet;
+    }
+
+    if (this->currentSong == NULL) {
+        qDebug() << "   -> PlaylistStatus::InvalidNumbersSet (is NULL)";
+        this->currentSong = e;
+        this->lastStatus = PlaylistStatus::InvalidNumbersSet;
+    }
+
+    return this->lastStatus;
 }
 
 
