@@ -1,5 +1,4 @@
 #include "LoopingPlayer.h"
-#include <QDebug>
 #include <QTextStream>
 
 
@@ -9,41 +8,12 @@ LoopingPlayer::LoopingPlayer() :
     mediaplayer(new QMediaPlayer(this)),
     playlist(new QMediaPlaylist(mediaplayer))
 {
-    //playlist->setPlaybackMode(QMediaPlaylist::Loop);
     mediaplayer->setPlaylist(playlist);
-
-    /*
-    if (mediaplayer->availability() == QMultimedia::Available) {
-        qDebug() << "Player available";
-        service = mediaplayer->service();
-        if (service != NULL) {
-            qDebug() << "   Retrieved service";
-            gaplessCtrl = qobject_cast<QMediaGaplessPlaybackControl *>(
-                service->requestControl("org.qt-project.qt.mediaplayercontrol/5.0"));
-            if (gaplessCtrl != NULL) {
-                qDebug() << "      Retrieved QMediaGaplessPlaybackControl";
-                service->releaseControl(gaplessCtrl);
-                gaplessCtrl->setCrossfadeTime(5000);
-                qDebug() << "      Released QMediaGaplessPlaybackControl";
-            }
-            else {
-                qDebug() << "      QMediaGaplessPlaybackControl is null!";
-            }
-        }
-        else {
-            qDebug() << "   Service is null!";
-        }
-    }
-    else {
-        qDebug() << "Player not available:" << mediaplayer->availability();
-    }
-    */
 }
 
 
 void LoopingPlayer::play()
 {
-    qDebug() << "LoopingPlayer::play";
     this->playingClicked = true;
     mediaplayer->play();
 }
@@ -51,7 +21,6 @@ void LoopingPlayer::play()
 
 void LoopingPlayer::pause()
 {
-    qDebug() << "LoopingPlayer::pause";
     this->playingClicked = false;
     mediaplayer->pause();
 }

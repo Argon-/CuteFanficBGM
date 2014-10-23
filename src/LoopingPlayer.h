@@ -6,10 +6,6 @@
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QMediaContent>
-//#include <QMediaService>
-//#include <QMediaControl>
-//#include <QMediaPlayerControl>
-//#include <QMediaGaplessPlaybackControl>
 
 
 
@@ -37,10 +33,6 @@ private:
     bool playingClicked;
     QMediaPlayer   *mediaplayer;
     QMediaPlaylist *playlist;
-    //QMediaService  *service;
-    //QMediaControl  *ctrl;
-    //QMediaPlayerControl *playerCtrl;
-    //QMediaGaplessPlaybackControl *gaplessCtrl;
 
 };
 

@@ -1,6 +1,5 @@
 #include <QApplication>
 #include <QCoreApplication>
-#include <QDebug>
 
 #include "MainWindow.h"
 #include "Playlist.h"

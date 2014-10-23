@@ -7,6 +7,7 @@
 #include <QCryptographicHash>
 
 
+
 Playlist::Playlist(const QString &playListSeparator, 
                    const QString &playListSongSeparator, 
                    const QString &playListTerminator,
@@ -125,7 +126,7 @@ void Playlist::printPlaylist()
 {
     QList<QPair<QString, QList<int> > >::const_iterator i;
     for (i = playList.constBegin(); i != playList.constEnd(); ++i) {
-        QTextStream(stdout) << "Currently at: " << i->first << endl;
+        QTextStream(stdout) << "currently at: " << i->first << endl;
         QList<int>::const_iterator e;
         for (e = i->second.constBegin(); e != i->second.constEnd(); ++e) {
             QTextStream(stdout) << "   " << *e << " (" 
@@ -173,7 +174,7 @@ PlaylistStatus Playlist::createPlaylistFromFile(QTextStream &in)
     QCryptographicHash checksum(QCryptographicHash::Md5);
 
     while (!in.atEnd()) {
-        QString line = in.readLine();
+        QString line = in.readLine().trimmed();
         if (line.isEmpty())
             continue;
 
@@ -253,7 +254,7 @@ PlaylistStatus Playlist::createSongMapFromFile(QTextStream &in)
     QCryptographicHash checksum(QCryptographicHash::Md5);
 
     while (!in.atEnd()) {
-        QString line = in.readLine();
+        QString line = in.readLine().trimmed();
         if (line.isEmpty())
             continue;
 
@@ -438,7 +439,6 @@ PlaylistStatus Playlist::setCurrentChapterByNumber(const int i)
 
 PlaylistStatus Playlist::setCurrentSongByNumber(const int i)
 {
-    qDebug() << "Playlist::setCurrentSongByNumber with" << i;
     QList<int>::const_iterator e = this->currentSong;
 
     if (i > -1 && i < this->currentChapter->second.size()) {
@@ -446,12 +446,10 @@ PlaylistStatus Playlist::setCurrentSongByNumber(const int i)
         this->lastStatus = PlaylistStatus::OK;
     }
     else {
-        qDebug() << "   -> PlaylistStatus::InvalidNumbersSet";
         this->lastStatus = PlaylistStatus::InvalidNumbersSet;
     }
 
     if (this->currentSong == NULL) {
-        qDebug() << "   -> PlaylistStatus::InvalidNumbersSet (is NULL)";
         this->currentSong = e;
         this->lastStatus = PlaylistStatus::InvalidNumbersSet;
     }

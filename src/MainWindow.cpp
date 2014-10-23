@@ -1,6 +1,5 @@
 #include "MainWindow.h"
 #include <QTextStream>
-#include <QDebug>
 
 
 MainWindow::MainWindow(QWidget *parent, 
@@ -229,42 +228,37 @@ void MainWindow::init() {
     // current chapter
     bool loadedListDoesNotMatchChecksum = false;
     QString pcs = settings->value("location/playlist_checksum", "").toString();
-    qDebug() << "Reading playlist checksum:" << pcs;
     if (!pcs.isEmpty() && pcs == playlist->getPlaylistChecksum())
     {
-        qDebug() << "   pcs matches!";
         bool ok;
         int n = settings->value("state/playlist/current_chapter_num", "").toInt(&ok);
         PlaylistStatus s1 = playlist->setCurrentChapterByNumber(n);
 
         // current song
         QString scs = settings->value("location/songlist_checksum", "").toString();
-        qDebug() << "   Reading songlist checksum:" << scs;
         if (ok && s1 == PlaylistStatus::OK && !scs.isEmpty() && scs == playlist->getSongMapChecksum())
         {
-            qDebug() << "      scs matches!";
             bool ok;
             int m = settings->value("state/playlist/current_song_num", "").toInt(&ok);
             PlaylistStatus s2 = playlist->setCurrentSongByNumber(m);
 
             // playback state
-            if (ok && s2 == PlaylistStatus::OK && settings->value("state/player/playing", false).toBool()) {
-                qDebug() << "      resuming playback from last position";
-                player->play();
+            if (ok && s2 == PlaylistStatus::OK) {
+                QTextStream(stdout) << "successfully restored progress" << endl;
+                if (settings->value("state/player/playing", false).toBool()) {
+                    player->play();
+                }
             }
             else {
                 loadedListDoesNotMatchChecksum = true;
-                qDebug() << "      scs has problems";
             }
         }
         else {
             loadedListDoesNotMatchChecksum = true;
-            qDebug() << "   scs does not match: " << scs << " != " << playlist->getSongMapChecksum();
         }
     }
     else {
         loadedListDoesNotMatchChecksum = true;
-        qDebug() << "pcs does not match: " << pcs << " != " << playlist->getPlaylistChecksum();
     }
 
     // when loaded lists (i.e., old path was still fine) have changed content,
@@ -285,9 +279,7 @@ void MainWindow::init() {
 
 
 void MainWindow::playpause_cb()
-{
-    qDebug() << "playpause_cb";
-    
+{    
     if (player->isPlaying()) {
         btn_playpause->setText(tr("Play"));
         act_playpause->setText(tr("Play"));
@@ -305,7 +297,6 @@ void MainWindow::playpause_cb()
 
 void MainWindow::proceed_cb()
 {
-    qDebug() << "proceed_cb";
     playlist->nextSong(false);
     settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
     settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
@@ -315,7 +306,6 @@ void MainWindow::proceed_cb()
 
 void MainWindow::reset_cb()
 {
-    qDebug() << "reset_cb";
     playlist->reset();
     settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
     settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
@@ -331,7 +321,6 @@ void MainWindow::reset_cb()
 
 void MainWindow::ch_prev_cb()
 {
-    qDebug() << "ch_prev_cb";
     playlist->prevChapter();
     settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
     settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
@@ -341,7 +330,6 @@ void MainWindow::ch_prev_cb()
 
 void MainWindow::ch_next_cb()
 {
-    qDebug() << "ch_next_cb";
     playlist->nextChapter();
     settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
     settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
@@ -351,7 +339,6 @@ void MainWindow::ch_next_cb()
 
 void MainWindow::song_prev_cb()
 {
-    qDebug() << "song_prev_cb";
     playlist->prevSong();
     settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
     settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
@@ -361,7 +348,6 @@ void MainWindow::song_prev_cb()
 
 void MainWindow::song_next_cb()
 {
-    qDebug() << "song_next_cb";
     playlist->nextSong();
     settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
     settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
@@ -371,7 +357,6 @@ void MainWindow::song_next_cb()
 
 void MainWindow::slider_volume_cb(int value)
 {
-    qDebug() << "slider_volume_cb: " << value;
     player->setVolume(value);
     settings->setValue("state/player/volume", value);
 }
@@ -394,7 +379,7 @@ void MainWindow::selectAndSetSonglistFile_cb()
         return;
     }
 
-    QTextStream(stdout) << "New SonglistFile: " << s << endl;
+    QTextStream(stdout) << "new songlist file: " << s << endl;
     settings->setValue("location/songlist", s);
     settings->setValue("location/songlist_checksum", playlist->getSongMapChecksum());
     this->updateLabels();
@@ -447,7 +432,7 @@ void MainWindow::selectAndSetPlaylistFile_cb()
         return;
     }
 
-    QTextStream(stdout) << "New PlaylistFile: " << s << endl;
+    QTextStream(stdout) << "new playlist file: " << s << endl;
     settings->setValue("location/playlist", s);
     settings->setValue("location/playlist_checksum", playlist->getPlaylistChecksum());
     this->updateLabels();
@@ -502,7 +487,7 @@ void MainWindow::selectAndSetSongDirectory_cb()
         return;
     }
 
-    QTextStream(stdout) << "New SongDirectory: " << s << endl;
+    QTextStream(stdout) << "new song directory: " << s << endl;
     settings->setValue("location/songs", s);
     this->updateLabels();
 }
