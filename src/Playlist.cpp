@@ -155,9 +155,10 @@ QString Playlist::getCurrentSongName()
     if (*this->currentSong == 0)
         return "";
     QString s = this->songMap.value(abs(*this->currentSong), "");
-    // probably better to use QFileInfo::basename but it uses QFile internally 
-    // for this simple task
-    return s.left(s.lastIndexOf("."));
+    const int i = s.lastIndexOf(".");
+    if (i == -1)
+        return s;
+    return s.left(i);
 }
 
 
