@@ -373,7 +373,7 @@ void MainWindow::updateLabels()
     player->setTrack(playlist->getCurrentSongPath(), playlist->loopCurrentSong());
     this->l_title->setText(playlist->getTitle());
     this->l_ch_ctrl->setText(playlist->getCurrentChapter());
-    this->l_song_ctrl->setText(tr("Song: ") + playlist->getCurrentSong());
+    this->l_song_ctrl->setText(tr("Song: ") + QString::number(playlist->getCurrentSongNumber() + 1));
     this->l_song_title->setText(playlist->getCurrentSongName());
 }
 
