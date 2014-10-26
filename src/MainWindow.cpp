@@ -221,7 +221,7 @@ void MainWindow::init() {
     }
 
     // playback volume
-    int vol = settings->value("state/player/volume", 50).toInt();
+    int vol = settings->value("state/player/volume", this->max_volume/2).toInt();
     slider_volume->setValue(vol);
     player->setVolume(vol);
 
@@ -306,10 +306,16 @@ void MainWindow::proceed_cb()
 
 void MainWindow::reset_cb()
 {
+    // chapter/song
     playlist->reset();
     settings->setValue("state/playlist/current_chapter_num", playlist->getCurrentChapterNumber());
     settings->setValue("state/playlist/current_song_num", playlist->getCurrentSongNumber());
     this->updateLabels();
+    // volume
+    slider_volume->setValue(this->max_volume/2);
+    player->setVolume(this->max_volume/2);
+    settings->setValue("state/player/volume", this->max_volume/2);
+    // playback
     if (player->isPlaying()) {
         btn_playpause->setText(tr("Play"));
         act_playpause->setText(tr("Play"));
