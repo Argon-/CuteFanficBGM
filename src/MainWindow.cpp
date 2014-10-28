@@ -150,6 +150,24 @@ MainWindow::MainWindow(QWidget *parent,
     connect(act_selectSongDirectoy,SIGNAL(triggered()), this, SLOT(selectAndSetSongDirectory_cb()));
     connect(act_always_on_top,     SIGNAL(triggered()), this, SLOT(toggleAlwaysOnTop()));
 
+
+    // restore settings
+
+    // always on top
+    this->alwaysOnTop = settings->value("state/window/always_on_top", 
+                                        false).toBool();
+    if (this->alwaysOnTop) {
+        this->setWindowFlags(this->windowFlags() | 
+                             Qt::CustomizeWindowHint | 
+                             Qt::WindowStaysOnTopHint);
+    }
+
+    // window geometry
+    QByteArray geo = settings->value("state/window/geometry").toByteArray();
+    if (!geo.isEmpty()) {
+        this->restoreGeometry(geo);
+    }
+
     btn_proceed->setFocus();
     QTimer::singleShot(0, this, SLOT(init()));
 }
@@ -207,18 +225,8 @@ void MainWindow::init() {
     QTextStream(stdout) << "playlist: " << ppath  << " (" 
                         << playlist->getPlaylistChecksum() << ")" << endl;
 
-
-    // load and apply settings
-
-    // always on top
-    this->alwaysOnTop = settings->value("state/window/always_on_top", 
-                                        false).toBool();
-    if (this->alwaysOnTop) {
-        this->setWindowFlags(this->windowFlags() | 
-                             Qt::CustomizeWindowHint | 
-                             Qt::WindowStaysOnTopHint);
-        this->show();
-    }
+    
+    // restore player/playlist-dependent settings
 
     // playback volume
     int vol = settings->value("state/player/volume", this->max_volume/2).toInt();
@@ -561,6 +569,13 @@ void MainWindow::toggleAlwaysOnTop()
                               Qt::WindowStaysOnTopHint));
         this->show();
     }
+}
+
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    settings->setValue("state/window/geometry", this->saveGeometry());
+    event->accept();
 }
 
 

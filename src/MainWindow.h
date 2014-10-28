@@ -7,6 +7,7 @@
 #include <QSlider>
 #include <QMenu>
 #include <QMenuBar>
+#include <QCloseEvent>
 
 #include "Playlist.h"
 #include "LoopingPlayer.h"
@@ -86,6 +87,7 @@ private:
                           const bool criticalWarning = false, 
                           const QString &buttonText = "OK");
     void updateLabels();
+    void closeEvent(QCloseEvent * event);
 
 private slots:
     void init();
