@@ -447,7 +447,7 @@ bool MainWindow::setSonglistFile(const QString &s,
         else {
             this->displayError(tr("Invalid file."), 
                                tr("Content of file \"") + s + 
-                               tr("\" is not correctly formatted."), 
+                               tr("\" is not formatted correctly."), 
                                criticalWarning, buttonText);
         }
         return false;
@@ -500,7 +500,7 @@ bool MainWindow::setPlaylistFile(const QString &s,
         else {
             this->displayError(tr("Invalid file."), 
                                tr("Content of file \"") + s + 
-                               tr("\" is not correctly formatted."), 
+                               tr("\" is not formatted correctly."), 
                                criticalWarning, buttonText);
         }
         return false;
