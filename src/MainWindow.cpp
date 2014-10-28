@@ -579,7 +579,7 @@ void MainWindow::toggleAlwaysOnTop()
         this->show();
     }
     else {
-        // assumption: this is never called without both flags set, otherwhise
+        // assumption: this is never called without both flags set, otherwise
         // they are added and not removed
         this->setWindowFlags(this->windowFlags() ^ 
                              (Qt::CustomizeWindowHint | 
