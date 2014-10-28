@@ -190,8 +190,8 @@ MainWindow::MainWindow(QWidget *parent,
 }
 
 
-void MainWindow::init() {
-
+void MainWindow::init() 
+{
     // retrieve song dir
     QString spath = settings->value("location/songs", "/").toString();
     if (!QFile::exists(spath)) {
