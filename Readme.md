@@ -5,6 +5,8 @@ An implementation of [FanficBGM](http://ks.renai.us/viewtopic.php?f=52&t=9907&st
 The original idea, playlist and implementation was developed by and is the 
 intellectual property of *Guest Poster*.
 
+Some [screenshots](https://imgur.com/a/wqUOq).
+
 **Note**: while CuteFanficBGM technically works on Windows too, I strongly advise using
 the original implementation as Windows user since I can't test nor support this
 platform in any way. Also, the original one is visually way more appealing. ;)
