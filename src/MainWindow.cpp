@@ -193,13 +193,14 @@ MainWindow::MainWindow(QWidget *parent,
 void MainWindow::init() 
 {
     // retrieve song dir
-    QString spath = settings->value("location/songs", "/").toString();
+    QString spath = settings->value("location/songs").toString();
     if (!QFile::exists(spath)) {
         spath = QFileDialog::getExistingDirectory(this, 
                         tr("Please select a song directory"), 
                         /*QDir::homePath()*/ "", QFileDialog::ShowDirsOnly);
     }
     if (!this->setSongDirectory(spath, true, tr("Quit"))) {
+        settings->remove("location/songs");
         this->close();
         return;
     }
@@ -212,6 +213,7 @@ void MainWindow::init()
         slpath = this->promptForFile(tr("Please select a songlist"));
     }
     if (!this->setSonglistFile(slpath, true, tr("Quit"))) {
+        settings->remove("location/songlist");
         this->close();
         return;
     }
@@ -225,6 +227,8 @@ void MainWindow::init()
                            tr("One or more songs were not found. See log for details. \
                               Please try a different song directory or validate our songlist."), 
                            true, tr("Quit"));
+        settings->remove("location/songs");
+        settings->remove("location/songlist");
         this->close();
         return;
     }
@@ -235,6 +239,7 @@ void MainWindow::init()
         ppath = this->promptForFile(tr("Please select a playlist"));
     }
     if (!this->setPlaylistFile(ppath, true, tr("Quit"))) {
+        settings->remove("location/playlist");
         this->close();
         return;
     }
