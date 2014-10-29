@@ -17,6 +17,7 @@
  
 #include "LoopingPlayer.h"
 #include <QTextStream>
+#include <QFile>
 
 
 
@@ -44,8 +45,8 @@ void LoopingPlayer::pause()
 
 
 void LoopingPlayer::setTrack(const QString &s, bool loop) {
-    if (s.isEmpty()) {
-        mediaplayer->pause();
+    if (!QFile::exists(s)) {
+        //mediaplayer->pause();
         playlist->clear();
         return;
     }
