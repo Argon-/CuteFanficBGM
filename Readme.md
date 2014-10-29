@@ -63,7 +63,7 @@ package manager (e.g. [homebrew](http://brew.sh)) and install the dependency:
 
     brew install qt5
 
-One minor difference though: `qt5`'s `qmake` is not in your path. 
+One minor difference though: `qt5`'s `qmake` is not in your `PATH` by default. 
 Homebrew does this deliberately because of compatibility issues with `qt4`.
 However, just use the full path to `qmake` or do it like this:
 
