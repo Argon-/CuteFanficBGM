@@ -54,8 +54,8 @@ Done!
 
 ### OS X
 
-*(coming soon)* There is a precompiled binary in **Releases**, compiled using 10.10. *(coming soon)*
-In theory it should work on 10.9 and 10.8 too (maybe even on 10.7) but I have
+There is a precompiled binary in [Releases](https://github.com/Argon-/CuteFanficBGM/releases), 
+compiled using 10.10. In theory it should work on 10.9, 10.8 and 10.7 too but I have
 no way to verify this.
 
 Technically, you can just do the same Linux users do. Use your favorite 
