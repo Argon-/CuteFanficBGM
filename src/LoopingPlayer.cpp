@@ -33,33 +33,33 @@ LoopingPlayer::LoopingPlayer() :
 void LoopingPlayer::play()
 {
     this->playingClicked = true;
-    mediaplayer->play();
+    this->mediaplayer->play();
 }
 
 
 void LoopingPlayer::pause()
 {
     this->playingClicked = false;
-    mediaplayer->pause();
+    this->mediaplayer->pause();
 }
 
 
 void LoopingPlayer::setTrack(const QString &s, bool loop) {
     if (!QFile::exists(s)) {
         //mediaplayer->pause();
-        playlist->clear();
+        this->playlist->clear();
         return;
     }
 
     bool i = this->isPlaying() || this->playingClicked;
-    playlist->clear();
-    playlist->addMedia(QUrl::fromLocalFile(s));
-    playlist->setCurrentIndex(0);
+    this->playlist->clear();
+    this->playlist->addMedia(QUrl::fromLocalFile(s));
+    this->playlist->setCurrentIndex(0);
 
     if (loop)
-        playlist->setPlaybackMode(QMediaPlaylist::Loop);
+        this->playlist->setPlaybackMode(QMediaPlaylist::Loop);
     else
-        playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+        this->playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
 
     if (i)
         this->play();
@@ -68,7 +68,7 @@ void LoopingPlayer::setTrack(const QString &s, bool loop) {
 
 void LoopingPlayer::setVolume(int n)
 {
-    mediaplayer->setVolume(n);
+    this->mediaplayer->setVolume(n);
 }
 
 
@@ -83,39 +83,39 @@ void LoopingPlayer::togglePlaying()
 
 bool LoopingPlayer::isAvailable()
 {
-    return mediaplayer && mediaplayer->isAvailable();
+    return this->mediaplayer && this->mediaplayer->isAvailable();
 }
 
 
 bool LoopingPlayer::isPlaying()
 {
-    return this->playingClicked || mediaplayer->state() == QMediaPlayer::PlayingState;
+    return this->playingClicked || this->mediaplayer->state() == QMediaPlayer::PlayingState;
 }
 
 
 bool LoopingPlayer::isPaused()
 {
-    return mediaplayer->state() == QMediaPlayer::PausedState;
+    return this->mediaplayer->state() == QMediaPlayer::PausedState;
 }
 
 
 bool LoopingPlayer::isStopped()
 {
-    return mediaplayer->state() == QMediaPlayer::StoppedState;
+    return this->mediaplayer->state() == QMediaPlayer::StoppedState;
 }
 
 
 bool LoopingPlayer::isLoadingOrBuffering()
 {
-    return mediaplayer->mediaStatus() == QMediaPlayer::BufferingMedia || 
-            mediaplayer->mediaStatus() == QMediaPlayer::LoadingMedia;
+    return this->mediaplayer->mediaStatus() == QMediaPlayer::BufferingMedia || 
+           this->mediaplayer->mediaStatus() == QMediaPlayer::LoadingMedia;
 }
 
 
 bool LoopingPlayer::isFaulty()
 {
-    return mediaplayer->mediaStatus() == QMediaPlayer::UnknownMediaStatus || 
-            mediaplayer->mediaStatus() == QMediaPlayer::InvalidMedia;
+    return this->mediaplayer->mediaStatus() == QMediaPlayer::UnknownMediaStatus || 
+           this->mediaplayer->mediaStatus() == QMediaPlayer::InvalidMedia;
 }
 
 
