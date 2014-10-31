@@ -224,7 +224,8 @@ void MainWindow::init()
     // check if every song actually exists
     if (playlist->checkSongDirectory() != PlaylistStatus::OK) {
         this->displayError(tr("File(s) not found."), 
-                           tr("One or more songs were not found. See log for details."));
+                           tr("One or more songs were not found. See log for details."),
+                           false, tr("OK"));
     }
 
     // retrieve playlist
@@ -524,7 +525,8 @@ void MainWindow::selectAndSetSongDirectory_cb()
     // check if every song actually exists
     if (playlist->checkSongDirectory() != PlaylistStatus::OK) {
         this->displayError(tr("File(s) not found."), 
-                           tr("One or more songs were not found. See log for details."));
+                           tr("One or more songs were not found. See log for details."),
+                           false, tr("OK"));
     }
 }
 
