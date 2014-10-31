@@ -224,13 +224,7 @@ void MainWindow::init()
     // check if every song actually exists
     if (playlist->checkSongDirectory() != PlaylistStatus::OK) {
         this->displayError(tr("File(s) not found."), 
-                           tr("One or more songs were not found. See log for details. \
-                              Please try a different song directory or validate our songlist."), 
-                           true, tr("Quit"));
-        settings->remove("location/songs");
-        settings->remove("location/songlist");
-        this->close();
-        return;
+                           tr("One or more songs were not found. See log for details."));
     }
 
     // retrieve playlist
@@ -526,6 +520,12 @@ void MainWindow::selectAndSetSongDirectory_cb()
     QTextStream(stdout) << "new song directory: " << s << endl;
     settings->setValue("location/songs", s);
     this->updateLabels();
+
+    // check if every song actually exists
+    if (playlist->checkSongDirectory() != PlaylistStatus::OK) {
+        this->displayError(tr("File(s) not found."), 
+                           tr("One or more songs were not found. See log for details."));
+    }
 }
 
 

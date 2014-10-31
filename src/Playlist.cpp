@@ -386,7 +386,7 @@ QString Playlist::getCurrentSongPath()
 
 bool Playlist::loopCurrentSong()
 {
-    return *currentSong > 0;
+    return *this->currentSong > 0;
 }
 
 
