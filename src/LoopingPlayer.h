@@ -39,6 +39,7 @@ public:
     void togglePlaying();
     void setVolume(int n);
     void setTrack(const QString &s, bool loop = true);
+    bool hasNoSong();
     bool isAvailable();
     bool isPlaying();
     bool isPaused();

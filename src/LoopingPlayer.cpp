@@ -81,6 +81,12 @@ void LoopingPlayer::togglePlaying()
 }
 
 
+bool LoopingPlayer::hasNoSong()
+{
+    return this->playlist->isEmpty();
+}
+
+
 bool LoopingPlayer::isAvailable()
 {
     return this->mediaplayer && this->mediaplayer->isAvailable();
