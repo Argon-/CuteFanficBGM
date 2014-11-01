@@ -18,6 +18,12 @@ QT      += widgets core gui multimedia
 CONFIG  += c++11
 TEMPLATE = app
 
+macx 
+{
+    QMAKE_INFO_PLIST = template_Info.plist
+    QMAKE_POST_LINK += ./update_info_plist.sh
+}
+
 
 TARGET = CuteFanficBGM
 
