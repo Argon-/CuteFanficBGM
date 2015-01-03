@@ -32,9 +32,9 @@ However, there are minor differences:
 
    * no simple view
    * no options view  
-     The whole state of CuteFanficBGM is restored whenever you launch 
+     Instead the whole state of CuteFanficBGM is restored whenever you launch 
      it again. This includes the properties: window position, always on top,
-     chapter, song, specified lists and directories, play-state
+     chapter, song, specified lists and directories, play-state.
    * additional display of song title and a volume change bar
 
 
