@@ -29,8 +29,8 @@ CuteFanficBGM should behave pretty similar.
 
 However, there are minor differences:
 
-   * no simple view
-   * no options view  
+   * no simple view (it already is simple enough)
+   * no options view
      Instead the whole state of CuteFanficBGM is restored whenever you launch 
      it again. You don't have to deal with preserving properties yourself, the program is smart enough.
    * additional display of song title and a volume change bar
